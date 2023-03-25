@@ -33,6 +33,8 @@ zoop.grouped = read_csv('trout_pzoop_grouped.alldates.csv')
       # Define efficiency based on organism type 
         # - efficiency with which a predator will assimilate energy from a prey defined by type of prey eaten 
 
+# Trout Fluxing - Base #==============================
+
 # Set up fluxweb dataframe (long format + wide matrix) # 
 fish.select = fish %>% 
   select(year, spp, biomass.g_perhec, biomass_g) %>% 
@@ -81,26 +83,85 @@ pelagic.miv.select
 zoop.grouped.select
 
 join1 = rbind(fish.select, pelagic.miv.select)
-trout_pelagic.web = rbind(join1, zoop.grouped.select) %>% arrange(year)
-trout_pelagic.web
+base = rbind(join1, zoop.grouped.select) %>% arrange(year)
+base
 
-trout_pelagic.web_2001.2014 = trout_pelagic.web %>%
-  filter(year < 2015)
-trout_pelagic.web_2015.2020 = trout_pelagic.web %>% 
-  filter(year > 2014)
+# Trout Fluxing - Base.wae_corrected #==============================
 
-setwd("J:/Box Sync/Butts_Scripts/Trout/trout-flux")
-write_csv(trout_pelagic.web_2001.2014, 'trout_species.data_01.14.csv')
-write_csv(trout_pelagic.web_2015.2020, 'trout_species.data_15.20.csv')
+# Set up fluxweb dataframe (long format + wide matrix) # 
+fish.select = fish %>% 
+  select(year, spp, biomass.g_perhec.corrected, biomass_g) %>% 
+  rename(bodymass_g = biomass_g) %>% 
+  rename(biomass.g_perhec = biomass.g_perhec.corrected) %>% # change to base name for ease of coding 
+  mutate(met.type = 'Ectothermic.vertebrate', 
+         org.type = 'animal') %>% 
+  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
+  mutate(efficiencies = 0.906) # If consumed - would be animal(ef level = prey) 
+fish.select
 
-# Read in interaction matrix (binary) 
+pelagic.miv.select = pelagic.miv %>%
+  select(year4, taxon, biomass.g_perhec, weight.avg.g) %>% 
+  rename(year = year4, 
+         spp = taxon, 
+         bodymass_g = weight.avg.g) %>%
+  mutate(met.type = 'Invertebrate', 
+         org.type = 'animal') %>% 
+  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
+  mutate(efficiencies = 0.906) %>% # If consumed - would be animal (ef.level = prey) 
+  mutate(spp = tolower(spp)) 
+pelagic.miv.select$spp = gsub('chaoborus larvae', 'chaoborus.larvae', pelagic.miv.select$spp)
+pelagic.miv.select 
+
+zoop.grouped.select = zoop.grouped %>% 
+  select(year4, sample_date, larger_group, biomass_g.perhec, avg.bodymass_g) %>% 
+  mutate(sample_date = mdy(sample_date)) %>% 
+  mutate(month = month(sample_date)) %>% 
+  filter(month == 7 | month == 8) %>%
+  rename(year = year4, 
+         spp = larger_group, 
+         bodymass_g = avg.bodymass_g, 
+         biomass.g_perhec = biomass_g.perhec) %>% 
+  group_by(year, spp) %>% 
+  summarize(biomass.g_perhec = mean(biomass.g_perhec),
+            bodymass_g = mean(bodymass_g)) %>% 
+  mutate(met.type = 'Invertebrate', 
+         org.type = 'animal') %>% 
+  mutate(spp = tolower(spp)) %>% 
+  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% 
+  mutate(efficiencies = 0.906) 
+zoop.grouped.select
+
+# Now combine the food web data and arrange by year # 
+fish.select[is.na(fish.select)] <- 0
+pelagic.miv.select
+zoop.grouped.select
+
+join1 = rbind(fish.select, pelagic.miv.select)
+base.wae_corrected = rbind(join1, zoop.grouped.select) %>% arrange(year)
+base.wae_corrected
+
+
+# Choose which dataset to flux #===========================
+# trout_pelagic.web is the dataset the fluxing code comes from 
+# Datasets # 
+  # Base = no manipulation 
+  # Base.wae_corrected = take 20% of walleye biomass to correct for littoral feeding
+
+### Select food web to flux  ### ==============================
+trout_pelagic.web = base.wae_corrected 
+
+
+# Select interaction matrix #===========================
+### Binary matrices ####============================ 
 early.mat = read_csv('matrix_01.14.csv')
 early.mat = as.matrix(early.mat)
+# Post Spiny water Flea
+late.mat = read_csv('matrix_15.20.csv')
+late.mat = as.matrix(late.mat)
 
-# Pre Spiny Water Flea #===========================
-
-##2001##=======================
-d01 =trout_pelagic.web_2001.2014 %>% filter(year == 2001) %>% filter(spp != 'lake.trout' & spp != 'walleye')
+# Trout Flux Run #==============================
+##2001
+d01 =trout_pelagic.web %>% filter(year == 2001) %>% filter(spp != 'lake.trout' & spp != 'walleye')
 d01
 
 mat.01 = early.mat[-c(2:3),-c(2:3)]
@@ -159,8 +220,8 @@ stab01 = stab01 %>%
   mutate(year = 2001)
 stab01
 
-## 2002 ##======================
-d02 = trout_pelagic.web_2001.2014 %>% filter(year == 2002) %>% filter(spp != 'lake.trout' & spp != 'walleye')
+## 2002 
+d02 = trout_pelagic.web %>% filter(year == 2002) %>% filter(spp != 'lake.trout' & spp != 'walleye')
 d02
 
 mat.02 = early.mat[-c(2:3),-c(2:3)]
@@ -219,8 +280,8 @@ stab02 = stab02 %>%
   mutate(year = 2002)
 stab02
 
-##2003##===========================
-d03 = trout_pelagic.web_2001.2014 %>% filter(year == 2003) %>% filter(spp != 'lake.trout' & spp != 'walleye')
+##2003
+d03 = trout_pelagic.web %>% filter(year == 2003) %>% filter(spp != 'lake.trout' & spp != 'walleye')
 d03
 
 mat.03 = early.mat[-c(2:3),-c(2:3)]
@@ -279,8 +340,8 @@ stab03 = stab03 %>%
   mutate(year = 2003)
 stab03
 
-##2004##============================
-d04 = trout_pelagic.web_2001.2014 %>% filter(year == 2004) %>% filter(spp != 'lake.trout' & spp != 'walleye')
+##2004
+d04 = trout_pelagic.web %>% filter(year == 2004) %>% filter(spp != 'lake.trout' & spp != 'walleye')
 d04
 
 mat.04 = early.mat[-c(2:3),-c(2:3)]
@@ -339,8 +400,8 @@ stab04 = stab04 %>%
   mutate(year = 2004)
 stab04
 
-##2005##============================
-d05 = trout_pelagic.web_2001.2014 %>% filter(year == 2005) %>% filter(spp != 'lake.trout' & spp != 'walleye')
+##2005
+d05 = trout_pelagic.web %>% filter(year == 2005) %>% filter(spp != 'lake.trout' & spp != 'walleye')
 d05
 
 mat.05 = early.mat[-c(2:3),-c(2:3)]
@@ -399,8 +460,8 @@ stab05 = stab05 %>%
   mutate(year = 2005)
 stab05
 
-##2006##============================
-d06 = trout_pelagic.web_2001.2014 %>% filter(year == 2006) %>% filter(spp != 'lake.trout' & spp != 'walleye')
+##2006
+d06 = trout_pelagic.web %>% filter(year == 2006) %>% filter(spp != 'lake.trout' & spp != 'walleye')
 d06
 
 mat.06 = early.mat[-c(2:3),-c(2:3)]
@@ -459,8 +520,8 @@ stab06 = stab06 %>%
   mutate(year = 2006)
 stab06
 
-##2007##============================
-d07 = trout_pelagic.web_2001.2014 %>% filter(year == 2007) 
+##2007
+d07 = trout_pelagic.web %>% filter(year == 2007) 
 d07
 
 mat.07 = early.mat
@@ -517,8 +578,8 @@ stab07 = stab07 %>%
   mutate(year = 2007)
 stab07
 
-##2008##============================
-d08 = trout_pelagic.web_2001.2014 %>% filter(year == 2008) 
+##2008
+d08 = trout_pelagic.web %>% filter(year == 2008) 
 d08
 
 mat.08 = early.mat
@@ -575,8 +636,8 @@ stab08 = stab08 %>%
   mutate(year = 2008)
 stab08
 
-##2009##============================
-d09 = trout_pelagic.web_2001.2014 %>% filter(year == 2009) 
+##2009
+d09 = trout_pelagic.web %>% filter(year == 2009) 
 d09
 
 mat.09 = early.mat
@@ -633,8 +694,8 @@ stab09 = stab09 %>%
   mutate(year = 2009)
 stab09
 
-##2010##============================
-d10 = trout_pelagic.web_2001.2014 %>% filter(year == 2010) 
+##2010
+d10 = trout_pelagic.web %>% filter(year == 2010) 
 d10
 
 mat.10 = early.mat
@@ -691,8 +752,8 @@ stab10 = stab10 %>%
   mutate(year = 2010)
 stab10
 
-##2011##============================
-d11 = trout_pelagic.web_2001.2014 %>% filter(year == 2011) 
+##2011
+d11 = trout_pelagic.web %>% filter(year == 2011) 
 d11
 
 mat.11 = early.mat
@@ -749,8 +810,8 @@ stab11 = stab11 %>%
   mutate(year = 2011)
 stab11
 
-##2012##============================
-d12 = trout_pelagic.web_2001.2014 %>% filter(year == 2012) 
+##2012
+d12 = trout_pelagic.web %>% filter(year == 2012) 
 d12
 
 mat.12 = early.mat
@@ -807,8 +868,8 @@ stab12 = stab12 %>%
   mutate(year = 2012)
 stab12
 
-##2013##============================
-d13 = trout_pelagic.web_2001.2014 %>% filter(year == 2013) 
+##2013
+d13 = trout_pelagic.web %>% filter(year == 2013) 
 d13
 
 mat.13 = early.mat
@@ -865,8 +926,8 @@ stab13 = stab13 %>%
   mutate(year = 2013)
 stab13
 
-##2014##============================
-d14 = trout_pelagic.web_2001.2014 %>% filter(year == 2014) %>% filter(spp != 'lake.trout' & spp != 'walleye')
+##2014
+d14 = trout_pelagic.web %>% filter(year == 2014) %>% filter(spp != 'lake.trout' & spp != 'walleye')
 d14
 
 mat.14 = early.mat[-c(2:3),-c(2:3)]
@@ -925,12 +986,8 @@ stab14 = stab14 %>%
   mutate(year = 2014)
 stab14
 
-# Post Spiny water Flea # ====================
-late.mat = read_csv('matrix_15.20.csv')
-late.mat = as.matrix(late.mat)
-
-## 2015 ##===============================
-d15 = trout_pelagic.web_2015.2020 %>% filter(year == 2015) 
+## 2015 
+d15 = trout_pelagic.web %>% filter(year == 2015) 
 d15
 
 mat.15 = late.mat
@@ -987,8 +1044,8 @@ stab15 = stab15 %>%
   mutate(year = 2015)
 stab15
 
-## 2016 ##======================
-d16 = trout_pelagic.web_2015.2020 %>% filter(year == 2016) %>% filter(spp != 'lake.trout' & spp != 'walleye')
+## 2016 
+d16 = trout_pelagic.web %>% filter(year == 2016) %>% filter(spp != 'lake.trout' & spp != 'walleye')
 d16
 
 mat.16 = late.mat[-c(2:3),-c(2:3)]
@@ -1047,8 +1104,8 @@ stab16 = stab16 %>%
   mutate(year = 2016)
 stab16
 
-## 2017 ##===============================
-d17 = trout_pelagic.web_2015.2020 %>% filter(year == 2017) 
+## 2017 
+d17 = trout_pelagic.web %>% filter(year == 2017) 
 d17
 
 mat.17 = late.mat
@@ -1106,8 +1163,8 @@ stab17 = stab17 %>%
 stab17
 
 
-## 2018 ##=====================
-d18 = trout_pelagic.web_2015.2020 %>% filter(year == 2018) %>% filter(spp != 'lake.trout')
+## 2018 
+d18 = trout_pelagic.web %>% filter(year == 2018) %>% filter(spp != 'lake.trout')
 d18
 
 mat.18 = late.mat[-c(2),-c(2)]
@@ -1165,8 +1222,8 @@ stab18 = stab18 %>%
   mutate(year = 2018)
 stab18
 
-## 2019 ##=====================
-d19 = trout_pelagic.web_2015.2020 %>% filter(year == 2019) %>% filter(spp != 'walleye')
+## 2019 
+d19 = trout_pelagic.web %>% filter(year == 2019) %>% filter(spp != 'walleye')
 d19
 
 mat.19 = late.mat[-c(3),-c(3)]
@@ -1225,11 +1282,11 @@ stab19 = stab19 %>%
 stab19
 
 
-# ## 2020 ##=========================
+# ## 2020 ==
 
 ## No zooplankton data for 2020 :( ## 
 
-# d20 = trout_pelagic.web_2015.2020 %>% filter(year == 2020) %>% filter(spp != 'lake.trout')
+# d20 = trout_pelagic.web %>% filter(year == 2020) %>% filter(spp != 'lake.trout')
 # d20
 # 
 # mat.20 = late.mat[-c(2),-c(2)]
@@ -1287,7 +1344,7 @@ stab19
 #   mutate(year = 2020)
 # stab20
 
-# Final fluxing data set units in J/year #===========================
+# Base Dataset Fluxes in J/year #===========================
 outgoing.flux_final = bind_rows(outgoing01, outgoing02, outgoing03, outgoing04, outgoing05, outgoing06, outgoing07, 
                                 outgoing08, outgoing09, outgoing10, outgoing11, outgoing12, outgoing13, outgoing14, 
                                 outgoing15, outgoing16, outgoing17, outgoing18, outgoing19)
@@ -1308,12 +1365,7 @@ outgoing.flux.long = outgoing.flux_final %>%
                            .$taxa %in% 'bythotrephes' ~ 'bythotrephes'))
 outgoing.flux.long
 
-plot(flux_J_month~year, type = 'o', pch = 19, lwd =2, col = 'white',
-     data = piscivory.flux, xlim = c(2001, 2020), xlab = '', ylab = '')
-mtext(side = 2, 'Energy Flux (Joules year^-1)', line = 2.8)
-mtext(side = 1, 'Year', line = 2.8)
-abline(v = 2007, lty = 2) 
-abline(v = 2014, lty = 2)
+
 
 # Piscivory #
 piscivory.flux = outgoing.flux.long %>%
@@ -1327,6 +1379,8 @@ abline(v = 2007, lty = 2)
 abline(v = 2014, lty = 2)
 mtext('Piscovry Energy Flux (Joules year^-1)', side = 2, line = 2.8, cex = 1)
 mtext('Year', side = 1, line = 2.8, cex = 1)
+
+# Example Plot # 
 
 # Zooplanktivory # 
 zooplanktivory.flux = outgoing.flux.long %>%
