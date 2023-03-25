@@ -223,6 +223,8 @@ zp.error
 zp.final = left_join(zp.wide, zp.error, by = 'year')
 zp.final
 
+#Zoop Plot #========================
+
 plot(log(cladocera)~year, data = zp.final, type = 'o',col = '#99000d', lwd = 2, pch = 19, cex = 1, ylim = c(log(1),log(8000)),
      ylab = '', xlab = '', yaxt = 'n') 
 axis(side=2,
