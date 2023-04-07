@@ -8,6 +8,8 @@ fish = read_csv('trout_fish_biomass_selectpelagic.csv')
 pelagic.miv = read_csv('trout_pmiv_biomass.reduced.csv')
 zoop.grouped = read_csv('trout_pzoop_grouped.alldates.csv')
 
+transparent = rgb(0,0,0 ,maxColorValue = 255)
+
 # Fish biomass # 
 fish
 
@@ -75,7 +77,7 @@ par(mgp = c(2, 0.6, 0))
 
 # Log all three plots option # 
 plot(log(cisco)~year, data = fish.raw, type = 'o',col = '#99000d', lwd = 2, pch = 19, cex = 1, ylim = c(log(0.1), log(200)),
-     ylab = '', xlab = '', yaxt = 'n')
+     ylab = '', xlab = '', yaxt = 'n', col.axis = transparent)
 axis(side=2,
      at=c(log(0.1),log(0.2),log(0.3),log(0.4),log(0.5),log(0.6),log(0.7),log(0.8),log(0.9),
            log(1),log(2),log(3),log(4),log(5),log(6),log(7),log(8),log(9),log(10),
@@ -90,7 +92,7 @@ arrows(x0=fish.final$year, y0=log(fish.final$c.se.l),
 points(log(lake.trout)~year, data = fish.raw, type = 'o', col = '#ef3b2c', lwd = 2, pch = 19, cex = 1)
 arrows(x0=fish.final$year, y0=log(fish.final$lt.se.l), 
        x1=fish.final$year, y1=log(fish.final$lt.se.u), col = '#ef3b2c', code = 3, angle=90, length=0, lwd = 2)
-points(log(walleye.p20)~year, data = fish.raw, type = 'o', col = '#fc9272', lwd = 2, pch = 19, cex = 1)
+points(log(p20.walleye)~year, data = corrected.wae, type = 'o', col = '#fc9272', lwd = 2, pch = 19, cex = 1)
 arrows(x0=fish.final$year, y0=log(fish.final$w.se.l), 
        x1=fish.final$year, y1=log(fish.final$w.se.u), col = '#fc9272', code = 3, angle=90, length=0, lwd = 2)
 legend('bottomleft', legend = c('Cisco', 'Lake trout', 'Walleye (20%)'), pch = 19, col = c('#99000d','#ef3b2c', '#fc9272'),

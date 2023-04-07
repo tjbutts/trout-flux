@@ -140,13 +140,127 @@ join1 = rbind(fish.select, pelagic.miv.select)
 base.wae_corrected = rbind(join1, zoop.grouped.select) %>% arrange(year)
 base.wae_corrected
 
+# Trout Fluxing - High Fish; Low Zoops - MIV  #==============================
+
+# Set up fluxweb dataframe (long format + wide matrix) # 
+fish.select = fish %>% 
+  select(year, spp, biomass.g_perhec.corrected, biomass_g) %>% 
+  rename(bodymass_g = biomass_g) %>% 
+  rename(biomass.g_perhec = biomass.g_perhec.corrected) %>% # change to base name for ease of coding 
+  mutate(met.type = 'Ectothermic.vertebrate', 
+         org.type = 'animal') %>% 
+  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
+  mutate(efficiencies = 0.906) %>% # If consumed - would be animal(ef level = prey) 
+  mutate(biomass.g_perhec = biomass.g_perhec*2) # Double fish biomass
+fish.select
+
+pelagic.miv.select = pelagic.miv %>%
+  select(year4, taxon, biomass.g_perhec, weight.avg.g) %>% 
+  rename(year = year4, 
+         spp = taxon, 
+         bodymass_g = weight.avg.g) %>%
+  mutate(met.type = 'Invertebrate', 
+         org.type = 'animal') %>% 
+  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
+  mutate(efficiencies = 0.906) %>% # If consumed - would be animal (ef.level = prey) 
+  mutate(spp = tolower(spp)) %>% 
+  mutate(biomass.g_perhec = biomass.g_perhec/2)
+pelagic.miv.select$spp = gsub('chaoborus larvae', 'chaoborus.larvae', pelagic.miv.select$spp)
+pelagic.miv.select 
+
+zoop.grouped.select = zoop.grouped %>% 
+  select(year4, sample_date, larger_group, biomass_g.perhec, avg.bodymass_g) %>% 
+  mutate(sample_date = mdy(sample_date)) %>% 
+  mutate(month = month(sample_date)) %>% 
+  filter(month == 7 | month == 8) %>%
+  rename(year = year4, 
+         spp = larger_group, 
+         bodymass_g = avg.bodymass_g, 
+         biomass.g_perhec = biomass_g.perhec) %>% 
+  group_by(year, spp) %>% 
+  summarize(biomass.g_perhec = mean(biomass.g_perhec),
+            bodymass_g = mean(bodymass_g)) %>% 
+  mutate(met.type = 'Invertebrate', 
+         org.type = 'animal') %>% 
+  mutate(spp = tolower(spp)) %>% 
+  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% 
+  mutate(efficiencies = 0.906) %>%
+  mutate(biomass.g_perhec = biomass.g_perhec/2)
+zoop.grouped.select
+
+# Now combine the food web data and arrange by year # 
+fish.select[is.na(fish.select)] <- 0
+pelagic.miv.select
+zoop.grouped.select
+
+join1 = rbind(fish.select, pelagic.miv.select)
+hifish.lowzpmiv= rbind(join1, zoop.grouped.select) %>% arrange(year)
+hifish.lowzpmiv
+
+# Trout Fluxing - Low Fish; High Zoops - MIV  #==============================
+
+# Set up fluxweb dataframe (long format + wide matrix) # 
+fish.select = fish %>% 
+  select(year, spp, biomass.g_perhec.corrected, biomass_g) %>% 
+  rename(bodymass_g = biomass_g) %>% 
+  rename(biomass.g_perhec = biomass.g_perhec.corrected) %>% # change to base name for ease of coding 
+  mutate(met.type = 'Ectothermic.vertebrate', 
+         org.type = 'animal') %>% 
+  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
+  mutate(efficiencies = 0.906) %>% # If consumed - would be animal(ef level = prey) 
+  mutate(biomass.g_perhec = biomass.g_perhec/2) # Double fish biomass
+fish.select
+
+pelagic.miv.select = pelagic.miv %>%
+  select(year4, taxon, biomass.g_perhec, weight.avg.g) %>% 
+  rename(year = year4, 
+         spp = taxon, 
+         bodymass_g = weight.avg.g) %>%
+  mutate(met.type = 'Invertebrate', 
+         org.type = 'animal') %>% 
+  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
+  mutate(efficiencies = 0.906) %>% # If consumed - would be animal (ef.level = prey) 
+  mutate(spp = tolower(spp)) %>% 
+  mutate(biomass.g_perhec = biomass.g_perhec*2)
+pelagic.miv.select$spp = gsub('chaoborus larvae', 'chaoborus.larvae', pelagic.miv.select$spp)
+pelagic.miv.select 
+
+zoop.grouped.select = zoop.grouped %>% 
+  select(year4, sample_date, larger_group, biomass_g.perhec, avg.bodymass_g) %>% 
+  mutate(sample_date = mdy(sample_date)) %>% 
+  mutate(month = month(sample_date)) %>% 
+  filter(month == 7 | month == 8) %>%
+  rename(year = year4, 
+         spp = larger_group, 
+         bodymass_g = avg.bodymass_g, 
+         biomass.g_perhec = biomass_g.perhec) %>% 
+  group_by(year, spp) %>% 
+  summarize(biomass.g_perhec = mean(biomass.g_perhec),
+            bodymass_g = mean(bodymass_g)) %>% 
+  mutate(met.type = 'Invertebrate', 
+         org.type = 'animal') %>% 
+  mutate(spp = tolower(spp)) %>% 
+  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% 
+  mutate(efficiencies = 0.906) %>%
+  mutate(biomass.g_perhec = biomass.g_perhec*2)
+zoop.grouped.select
+
+# Now combine the food web data and arrange by year # 
+fish.select[is.na(fish.select)] <- 0
+pelagic.miv.select
+zoop.grouped.select
+
+join1 = rbind(fish.select, pelagic.miv.select)
+lowfish.hizpmiv= rbind(join1, zoop.grouped.select) %>% arrange(year)
+lowfish.hizpmiv
 
 # Choose which dataset to flux #===========================
 # trout_pelagic.web is the dataset the fluxing code comes from 
 # Datasets # 
-  # Base = no manipulation 
-  # Base.wae_corrected = take 20% of walleye biomass to correct for littoral feeding
-
+  # base = no manipulation 
+  # base.wae_corrected = take 20% of walleye biomass to correct for littoral feeding
+  # hifish.lowzpmiv = 20% of walleye biomass; double fish; half zoop and miv
+  # lowfish.hizpmiv = 20% of walleye biomass; half fish; double zoop-miv
 ### Select food web to flux  ### ==============================
 trout_pelagic.web = base.wae_corrected
 
@@ -161,7 +275,7 @@ late.mat = read_csv('matrix_15.20.csv')
 late.mat = as.matrix(late.mat)
 
 ### Preference matrices ####======================
-# # Preference sums to one - higher percentage equals more preferred # 
+# # Preference sums to one - higher percentage equals more preferred #
 # early.mat = read_csv('matrix_01.14_preference.csv')
 # early.mat = as.matrix(early.mat)
 # 
@@ -1394,13 +1508,13 @@ zooplanktivory.flux
 
 
 #pelagic zoobenthivory # 
-pelagic.zoobenthivory.flux = outgoing.flux.long %>%
+pelagic.miv.flux = outgoing.flux.long %>%
   filter(group == 'pelagic.zoobenthivory') %>% 
   group_by(year) %>% 
   summarize(flux_yr = sum(flux_J_yr), 
             flux_month = sum(flux_J_month)) %>%
   ungroup()
-pelagic.zoobenthivory.flux
+pelagic.miv.flux
 
 # bythotrephes flux # 
 byth.flux = outgoing.flux.long %>% 
@@ -1420,220 +1534,27 @@ total.flux = outgoing.flux.long %>%
   ungroup()
 total.flux
 
-
 # stability # ==============
 stability.estimate_final
 
+# Create Objects for Step 3 #================================
+# Binary matrix - wae.corrected # 
+bin.piscivory.flux = piscivory.flux
+bin.zooplanktivory.flux = zooplanktivory.flux
+bin.pelagic.miv.flux = pelagic.miv.flux
+bin.byth.flux = byth.flux
 
-# Plotting (Base Matrix) # ====================
-windows(height = 4, width = 6)
-par( mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
-par(tcl = -0.25)
-par(mgp = c(2, 0.6, 0))
+bin.stability = stability.estimate_final
 
-# Piscivory # 
-plot(log(flux_J_yr)~year, type = 'o', pch = 19, lwd =2, col = '#99000d', ylim = c(log(90), log(2000000)), yaxt = 'n', 
-     data = piscivory.flux, xlim = c(2001, 2019), xlab = '', ylab = '')
-axis(side=2,
-     at=c(log(90),
-          log(100),log(200),log(300),log(400),log(500),log(600),log(700),log(800),log(900),log(1000),
-          log(2000),log(3000),log(4000),log(5000),log(6000),log(7000),log(8000),log(9000),log(10000), 
-          log(20000),log(30000),log(40000),log(50000),log(60000),log(70000),log(80000),log(90000), log(100000),
-          log(200000),log(300000),log(400000),log(500000),log(600000),log(700000),log(800000),log(900000), 
-          log(1000000), log(2000000)), #Where the tick marks should be drawn
-     labels = c('90', '100', '', '','','','','','','','1000',
-                '', '','','','','','','','10000',
-                '', '','','','','','','','100000',
-                '', '','','','','','','','1000000', '2000000'),
-     las=0)
+bin.total.flux = total.flux
 
-# Piscivory - no walleye correction # 
+# Preference matrix - wae.corrected # (ONLY RUN AFTER PREFERENCE MATRICES ARE LOADED IN, RERUN FLUX AND STABILITY)
+pref.piscivory.flux = piscivory.flux
+pref.zooplanktivory.flux = zooplanktivory.flux
+pref.pelagic.miv.flux = pelagic.miv.flux
+pref.byth.flux = byth.flux
 
-#For uncorrected - must run base fluxes first # 
-#points(log(flux_J_yr)~ year, data = piscivory.flux, type = 'o', pch = 19, lwd = 1, col = 'gray30', xlab = '', ylab = '', lty = 2)
+pref.stability = stability.estimate_final
 
-# abline(v = 2007, lty = 2) 
-# abline(v = 2014, lty = 2)
-# mtext('Piscovry Energy Flux (Joules year^-1)', side = 2, line = 2.8, cex = 1)
-# mtext('Year', side = 1, line = 2, cex = 1)
-mtext(expression(`Log[Energy` ~ Flux ~ `(J`~ha^-1~year^-1~`)]`), side = 2, line = 2)
+pref.total.flux = total.flux
 
-# Zooplanktivory # 
-points(log(flux_yr)~year, type = 'o', pch = 19, lwd =2, col = '#ef3b2c',
-     data = zooplanktivory.flux, xlim = c(2001, 2019), xlab = '', ylab = '')
-# mtext('Zooplanktivory Energy Flux (Joules year^-1)', side = 2, line = 2.8, cex = 1)
-# mtext('Year', side = 1, line = 2.8, cex = 1)
-
-# For uncorrected - must run base fluxes first # 
-#points(log(flux_yr) ~ year, data = zooplanktivory.flux, type = 'o', pch = 19, lwd = 1, col = 'gray50', xlab = '', ylab = '', lty = 2)
-
-
-# Pelagic Zoobenthivory Flux # 
-points(log(flux_yr)~year, type = 'o', pch = 19, lwd =2, col = '#fc9272',
-     data = pelagic.zoobenthivory.flux, xlim = c(2001, 2019), xlab = '', ylab = '')
-# abline(v = 2007, lty = 2) 
-# abline(v = 2014, lty = 2)
-# mtext('Macroinvertebrate Energy Flux (Joules year^-1)', side = 2, line = 2.8, cex = 1)
-# mtext('Year', side = 1, line = 2.8, cex = 1)
-
-# For uncorrected - must run base fluxes first # 
-#points(log(flux_yr) ~ year, data = pelagic.zoobenthivory.flux, type = 'o', pch = 19, lwd = 1, col = 'gray70', xlab = '', ylab = '', lty = 2)
-
-
-# Bythotrephes -> Cisco Flux # 
-points(log(flux_yr)~year, type = 'o', pch = 19, lwd =2, col = '#fdd0a2',
-     data = byth.flux, xlim = c(2001, 2019), xlab = '', ylab = '')
-# abline(v = 2007, lty = 2)
-# abline(v = 2014, lty = 2)
-# mtext('Bythotrephes Energy Flux (Joules year^-1)', side = 2, line = 2.8, cex = 1)
-
-# For uncorrected - must run base fluxes first 
-#points(log(flux_yr) ~ year, data = byth.flux, type = 'o', pch = 19, lwd = 1, col = 'black', xlab = '', ylab = '', lty = 2)
-
-
-legend('bottomleft', legend = c('Piscivory Flux', 'Zooplanktivory Flux', 'Zoobenthivory Flux',
-                                'Bythorephes Flux'), pch = 19, col = c('#99000d','#ef3b2c', '#fc9272', '#fdd0a2'),
-       bty = 'n', cex = 1)
-lines(c(2006.5,2006.5), c(log(1000), log(3000000)), lty = 2)
-
-# Piscivory Flux legend without correction # 
-# windows(height=5, width=5)
-# par(mai=c(0.9,1,0.6,1))
-# plot(NULL ,xaxt='n',yaxt='n',bty='n',ylab='',xlab='', xlim=0:1, ylim=0:1)
-# legend('center', legend = c('Piscivory (uncorr.)', 'Zooplanktivory (uncorr.)',
-#                             'Zoobenthivory (uncorr.)', 'Bythotrephes (uncorr.)'), 
-#        pch=19, bty='n',
-#        pt.cex=1, cex=0.8,
-#        col = c("gray30", 'gray50', 'gray70', 'black'))
-
-# abline(v = 2006.5, lty = 2)
-# abline(h = log(1000))
-abline(v = 2014.5, lty = 2)
-
-# Total Flux 
-# points(log(total.yr)~year, type = 'o', pch = 19, col = 'black', lwd = 2.5, 
-#      data = total.flux, xlim = c(2001, 2019), xlab = '', ylab = '')
-# abline(v = 2007, lty = 2) 
-# abline(v = 2014, lty = 2)
-# mtext('Total Energy Flux (Joules year^-1)', side = 2, line = 2.8, cex = 1)
-# mtext('Year', side = 1, line = 2.8, cex = 1)
-
-
-# Plotting (Base Matrix) # ====================
-windows(height = 4, width = 6)
-par( mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
-par(tcl = -0.25)
-par(mgp = c(2, 0.6, 0))
-
-# Piscivory # 
-plot(log(flux_J_yr)~year, type = 'o', pch = 19, lwd =2, col = '#99000d', ylim = c(log(1), log(2000000)), yaxt = 'n', 
-     data = piscivory.flux, xlim = c(2001, 2019), xlab = '', ylab = '')
-axis(side=2,
-     at=c(log(1),log(2),log(3),log(4),log(5),log(6),log(7),log(8),log(9),log(10),
-          log(20),log(30),log(40),log(50),log(60),log(70),log(80),log(90),
-          log(100),log(200),log(300),log(400),log(500),log(600),log(700),log(800),log(900),log(1000),
-          log(2000),log(3000),log(4000),log(5000),log(6000),log(7000),log(8000),log(9000),log(10000), 
-          log(20000),log(30000),log(40000),log(50000),log(60000),log(70000),log(80000),log(90000), log(100000),
-          log(200000),log(300000),log(400000),log(500000),log(600000),log(700000),log(800000),log(900000), 
-          log(1000000), log(2000000)), #Where the tick marks should be drawn
-     labels = c('1', '', '','','','','','','','10','', '', '', '','','','',
-                '90', '100', '', '','','','','','','','1000',
-                '', '','','','','','','','10000',
-                '', '','','','','','','','100000',
-                '', '','','','','','','','1000000', '2000000'),
-     las=0)
-
-# Piscivory - no walleye correction # 
-
-#For uncorrected - must run base fluxes first # 
-#points(log(flux_J_yr)~ year, data = piscivory.flux, type = 'o', pch = 19, lwd = 1, col = 'gray30', xlab = '', ylab = '', lty = 2)
-
-# abline(v = 2007, lty = 2) 
-# abline(v = 2014, lty = 2)
-# mtext('Piscovry Energy Flux (Joules year^-1)', side = 2, line = 2.8, cex = 1)
-# mtext('Year', side = 1, line = 2, cex = 1)
-mtext(expression(`Log[Energy` ~ Flux ~ `(J`~ha^-1~year^-1~`)]`), side = 2, line = 2)
-
-# Zooplanktivory # 
-points(log(flux_yr)~year, type = 'o', pch = 19, lwd =2, col = '#ef3b2c',
-       data = zooplanktivory.flux, xlim = c(2001, 2019), xlab = '', ylab = '')
-# mtext('Zooplanktivory Energy Flux (Joules year^-1)', side = 2, line = 2.8, cex = 1)
-# mtext('Year', side = 1, line = 2.8, cex = 1)
-
-# For uncorrected - must run base fluxes first # 
-#points(log(flux_yr) ~ year, data = zooplanktivory.flux, type = 'o', pch = 19, lwd = 1, col = 'gray50', xlab = '', ylab = '', lty = 2)
-
-
-# Pelagic Zoobenthivory Flux # 
-points(log(flux_yr)~year, type = 'o', pch = 19, lwd =2, col = '#fc9272',
-       data = pelagic.zoobenthivory.flux, xlim = c(2001, 2019), xlab = '', ylab = '')
-# abline(v = 2007, lty = 2) 
-# abline(v = 2014, lty = 2)
-# mtext('Macroinvertebrate Energy Flux (Joules year^-1)', side = 2, line = 2.8, cex = 1)
-# mtext('Year', side = 1, line = 2.8, cex = 1)
-
-# For uncorrected - must run base fluxes first # 
-#points(log(flux_yr) ~ year, data = pelagic.zoobenthivory.flux, type = 'o', pch = 19, lwd = 1, col = 'gray70', xlab = '', ylab = '', lty = 2)
-
-
-# Bythotrephes -> Cisco Flux # 
-points(log(flux_yr)~year, type = 'o', pch = 19, lwd =2, col = '#fdd0a2',
-       data = byth.flux, xlim = c(2001, 2019), xlab = '', ylab = '')
-# abline(v = 2007, lty = 2)
-# abline(v = 2014, lty = 2)
-# mtext('Bythotrephes Energy Flux (Joules year^-1)', side = 2, line = 2.8, cex = 1)
-
-# For uncorrected - must run base fluxes first 
-#points(log(flux_yr) ~ year, data = byth.flux, type = 'o', pch = 19, lwd = 1, col = 'black', xlab = '', ylab = '', lty = 2)
-
-
-legend('bottomleft', legend = c('Piscivory Flux', 'Zooplanktivory Flux', 'Zoobenthivory Flux',
-                                'Bythorephes Flux'), pch = 19, col = c('#99000d','#ef3b2c', '#fc9272', '#fdd0a2'),
-       bty = 'n', cex = 1)
-lines(c(2006.5,2006.5), c(log(30), log(3000000)), lty = 2)
-
-# Piscivory Flux legend without correction # 
-# windows(height=5, width=5)
-# par(mai=c(0.9,1,0.6,1))
-# plot(NULL ,xaxt='n',yaxt='n',bty='n',ylab='',xlab='', xlim=0:1, ylim=0:1)
-# legend('center', legend = c('Piscivory (uncorr.)', 'Zooplanktivory (uncorr.)',
-#                             'Zoobenthivory (uncorr.)', 'Bythotrephes (uncorr.)'), 
-#        pch=19, bty='n',
-#        pt.cex=1, cex=0.8,
-#        col = c("gray30", 'gray50', 'gray70', 'black'))
-
-# abline(v = 2006.5, lty = 2)
-# abline(h = log(1000))
-abline(v = 2014.5, lty = 2)
-
-# Total Flux 
-# points(log(total.yr)~year, type = 'o', pch = 19, col = 'black', lwd = 2.5, 
-#      data = total.flux, xlim = c(2001, 2019), xlab = '', ylab = '')
-# abline(v = 2007, lty = 2) 
-# abline(v = 2014, lty = 2)
-# mtext('Total Energy Flux (Joules year^-1)', side = 2, line = 2.8, cex = 1)
-# mtext('Year', side = 1, line = 2.8, cex = 1)
-
-# Stability Plot (Base) # ==============================
-windows(height = 5, width = 6)
-plot(stability~year, type = 'o', pch = 19, lwd = 2, data = stability.estimate_final,ylim = c(-3, 300), xlim = c(2001,2019), xlab = '', ylab = '')
-mtext('Stability', side = 2, line = 2.8, cex = 1)
-mtext('Year', side = 1, line = 2.8, cex = 1)
-
-abline(h=0)
-abline(v = 2006.5, lty = 2) 
-abline(v = 2014.5, lty = 2)
-text(2018, -6, 'Stable', font = 3)
-text(2018, 10, 'Unstable', font = 3)
-
-# Stability Plot (Preference) # ==============================
-windows(height = 5, width = 6)
-plot(stability~year, type = 'o', pch = 19, lwd = 2, data = stability.estimate_final,ylim = c(-3, 300), xlim = c(2001,2019), xlab = '', ylab = '')
-mtext('Stability', side = 2, line = 2.8, cex = 1)
-mtext('Year', side = 1, line = 2.8, cex = 1)
-
-abline(h=0)
-abline(v = 2006.5, lty = 2) 
-abline(v = 2014.5, lty = 2)
-text(2018, -6, 'Stable', font = 3)
-text(2018, 10, 'Unstable', font = 3)
