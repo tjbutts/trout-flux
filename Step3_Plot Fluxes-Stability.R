@@ -1,47 +1,159 @@
-# Plot Fluxes #===============
+##========================================================## 
+       ## MAKE SURE THAT STEP 2 WAS RUN FIRST ##
+##========================================================##
 
-# Flux Datasets # 
-# Binary matrices 
-bin.piscivory.flux 
-bin.zooplanktivory.flux
-bin.pelagic.miv.flux
-bin.byth.flux
+# plot Trout Lake Energy fluxes # 
 
-bin.stability 
+# Flux datasets from Step 2 #===============
+binary_flux 
+binary_stability
 
-bin.total.flux
+preference_flux
+preference_stability
 
-# Preference matrices 
-pref.piscivory.flux
-pref.zooplanktivory.flux
-pref.pelagic.miv.flux
-pref.byth.flux
+# Binary Flux # ================================
+binary_flux.long = binary_flux %>% 
+  pivot_longer(cols = !c(year), 
+               names_to = 'taxa', 
+               values_to = 'flux_J_yr') %>% 
+  drop_na() %>%
+  mutate(group = case_when(.$taxa %in% c('cisco') ~ 'CSC_LT-WAE', 
+                           .$taxa %in% c('cladocera', 'rotifera', 'copepoda') & .$year < 2015 ~ 'ZP_MIV-CSC', 
+                           .$taxa %in% c('cladocera', 'rotifera', 'copepoda') & .$year > 2014 ~ 'ZP_MIV-CSC-SWF', 
+                           .$taxa %in% c('chaoborus.larvae', 'leptodora', 'mysis') ~ 'MIV_CSC-LT',
+                           .$taxa %in% 'bythotrephes' ~ 'SWF_CSC'))
+binary_flux.long
 
-pref.stability
+# Cisco -> Lake Trout and Walleye #
+flux.1.binary = binary_flux.long %>%
+  filter(group == 'CSC_LT-WAE')
+flux.1.binary[flux.1.binary$flux_J_yr == 0, 'flux_J_yr'] <- NA
+flux.1.binary
 
-pref.total.flux
+# pMIV -> Lake Trout and Cisco # 
+flux.2.binary = binary_flux.long %>%
+  filter(group == 'MIV_CSC-LT') %>% 
+  group_by(year) %>% 
+  summarize(flux_yr = sum(flux_J_yr)) %>%
+  ungroup()
+flux.2.binary
+
+# Zoop -> Cisco and pMIV # 
+flux.3.binary = binary_flux.long %>%
+  filter(group == 'ZP_MIV-CSC') %>% 
+  group_by(year) %>% 
+  summarize(flux_yr = sum(flux_J_yr)) %>%
+  ungroup()
+flux.3.binary
+
+# Zoop -> Cisco and pMIV and spiny water flea # 
+flux.4.binary = binary_flux.long %>%
+  filter(group == 'ZP_MIV-CSC-SWF') %>% 
+  group_by(year) %>% 
+  summarize(flux_yr = sum(flux_J_yr)) %>%
+  ungroup()
+flux.4.binary
+
+# spiny -> Cisco  # 
+flux.5.binary = binary_flux.long %>% 
+  filter(group == 'SWF_CSC') %>% 
+  group_by(year) %>% 
+  summarize(flux_yr = sum(flux_J_yr)) %>%
+  ungroup()
+flux.5.binary
+
+# Total energy flux # 
+total.flux.binary = binary_flux.long %>% 
+  group_by(year) %>% 
+  summarize(total.yr = sum(flux_J_yr)) %>% 
+  ungroup()
+total.flux.binary
+
+# stability # 
+binary_stability
+
+# Preference Flux # ================================
+preference_flux.long = preference_flux %>% 
+  pivot_longer(cols = !c(year), 
+               names_to = 'taxa', 
+               values_to = 'flux_J_yr') %>% 
+  drop_na() %>%
+  mutate(group = case_when(.$taxa %in% c('cisco') ~ 'CSC_LT-WAE', 
+                           .$taxa %in% c('cladocera', 'rotifera', 'copepoda') & .$year < 2015 ~ 'ZP_MIV-CSC', 
+                           .$taxa %in% c('cladocera', 'rotifera', 'copepoda') & .$year > 2014 ~ 'ZP_MIV-CSC-SWF', 
+                           .$taxa %in% c('chaoborus.larvae', 'leptodora', 'mysis') ~ 'MIV_CSC-LT',
+                           .$taxa %in% 'bythotrephes' ~ 'SWF_CSC'))
+preference_flux.long
+
+# Cisco -> Lake Trout and Walleye #
+flux.1.preference = preference_flux.long %>%
+  filter(group == 'CSC_LT-WAE')
+flux.1.preference[flux.1.preference$flux_J_yr == 0, 'flux_J_yr'] <- NA
+flux.1.preference
+
+# pMIV -> Lake Trout and Cisco # 
+flux.2.preference = preference_flux.long %>%
+  filter(group == 'MIV_CSC-LT') %>% 
+  group_by(year) %>% 
+  summarize(flux_yr = sum(flux_J_yr)) %>%
+  ungroup()
+flux.2.preference
+
+# Zoop -> Cisco and pMIV # 
+flux.3.preference = preference_flux.long %>%
+  filter(group == 'ZP_MIV-CSC') %>% 
+  group_by(year) %>% 
+  summarize(flux_yr = sum(flux_J_yr)) %>%
+  ungroup()
+flux.3.preference
+
+# Zoop -> Cisco and pMIV and spiny water flea # 
+flux.4.preference = preference_flux.long %>%
+  filter(group == 'ZP_MIV-CSC-SWF') %>% 
+  group_by(year) %>% 
+  summarize(flux_yr = sum(flux_J_yr)) %>%
+  ungroup()
+flux.4.preference
+
+# spiny -> Cisco  # 
+flux.5.preference = preference_flux.long %>% 
+  filter(group == 'SWF_CSC') %>% 
+  group_by(year) %>% 
+  summarize(flux_yr = sum(flux_J_yr)) %>%
+  ungroup()
+flux.5.preference
+
+# Total energy flux # 
+total.flux.preference = preference_flux.long %>% 
+  group_by(year) %>% 
+  summarize(total.yr = sum(flux_J_yr)) %>% 
+  ungroup()
+total.flux.preference
+
+# stability # 
+preference_stability
+
 
 # Plotting Total Energy Flux (Base; Preference) # 
-bin.total.flux = bin.total.flux %>%
-  rename(bin.total.yr = total.yr) %>% 
-  select(year, bin.total.yr)
-pref.total.flux = pref.total.flux %>%
-  rename(pref.total.yr = total.yr) %>%
-  select(year, pref.total.yr)
+tfb = total.flux.binary %>%
+  rename(binary.tf = total.yr)
+tfp = total.flux.preference %>% 
+  rename(pref.tf = total.yr)
 
-total = left_join(bin.total.flux, pref.total.flux, by = 'year') %>%
-  pivot_longer(cols = c(bin.total.yr, pref.total.yr), 
+total = left_join(tfb, tfp, by = 'year') %>%
+  pivot_longer(cols = c(binary.tf, pref.tf), 
                names_to = 'matrix', 
-               values_to = 'total.flux')
+               values_to = 'total.flux') %>% 
+  rename(Year = year)
 total
 
-windows(height = 4, width = 6)
+windows(height = 3, width = 8)
 library(ggplot2)
-ggplot(total, aes(fill = matrix, y = total.flux, x = year)) + 
+ggplot(total, aes(fill = matrix, y = total.flux, x = Year)) + 
   geom_bar(position = 'dodge', stat = 'identity') + 
   scale_fill_manual(values = c('black', 'gray60'), 
                     name = 'Interaction\nMatrix',
-                    breaks = c('bin.total.yr', 'pref.total.yr'),
+                    breaks = c('binary.tf', 'pref.tf'),
                     labels = c('Binary', 'Preference')) + theme_bw() + 
   scale_y_continuous(expand = c(0,0)) + 
   geom_vline(xintercept = c(2006.5, 2014.5), linewidth = 1, linetype = 'dotted') +
