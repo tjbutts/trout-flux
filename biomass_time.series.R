@@ -59,9 +59,13 @@ par(mfrow =c(3,1), mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
 par(tcl = -0.25)
 par(mgp = c(2, 0.6, 0))
 
-wae = '#b5a479'
-lt = '#A77600'
-cis = 'gray30'
+lt = '#A77600' 
+wae = rgb(167, 118,0, max = 255, alpha = 175)
+cis = rgb(167, 118,0, max = 255, alpha = 100)
+
+# wae = '#b5a479'
+# lt = '#A77600'
+# cis = 'gray30'
 
 transparent = rgb(255,255,255 ,maxColorValue = 255, alpha = 100)
 
@@ -141,10 +145,15 @@ pmiv.final = left_join(pmiv.wide, pmiv.error, by = 'year4')
 pmiv.final
 
 # MIV plot # =============================
-mys = '#a75b51' 
-chao = '#692e27' 
-lep = '#f9afa6'
-byth = 'gray30'
+mys = '#a75b51'
+chao = rgb(167, 91,81, maxColorValue = 255, alpha = 175)
+lep = rgb(167, 91,81, maxColorValue = 255, alpha = 100)
+byth = 'gray60'
+
+# mys = '#a75b51' 
+# chao = '#692e27' 
+# lep = '#f9afa6'
+# byth = 'gray30'
   
 
 plot(log(chaoborus)~year4, data = pmiv.final, type = 'o',col = chao, lwd = 2, pch = 17, cex = 2, ylim = c(log(0.001),log(300)),
@@ -237,9 +246,13 @@ zp.final = left_join(zp.wide, zp.error, by = 'year')
 zp.final
 
 #Zoop Plot #======================== 
-cop = '#cd5c05'
-clad = 'gray30' 
-rot = '#e2a271'
+cop = '#cd5c05' 
+clad = rgb(205,92,5, maxColorValue = 255, alpha = 175)
+rot = rgb(205,92,5, maxColorValue = 255, alpha = 100)
+
+# cop = '#cd5c05'
+# clad = 'gray30' 
+# rot = '#e2a271'
 
 
 plot(log(cladocera)~year, data = zp.final, type = 'o',col = clad, lwd = 2, pch = 17, cex = 2, ylim = c(log(1),log(8000)),

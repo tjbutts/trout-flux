@@ -262,7 +262,7 @@ lowfish.hizpmiv
   # hifish.lowzpmiv = 20% of walleye biomass; double fish; half zoop and miv
   # lowfish.hizpmiv = 20% of walleye biomass; half fish; double zoop-miv
 ### Select food web to flux  ### ==============================
-trout_pelagic.web = base.wae_corrected
+trout_pelagic.web = hifish.lowzpmiv
 
 
 ### Binary matrices ####============================ 
