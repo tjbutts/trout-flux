@@ -52,7 +52,7 @@ pelagic.miv.select = pelagic.miv %>%
          bodymass_g = weight.avg.g) %>%
   mutate(met.type = 'Invertebrate', 
          org.type = 'animal') %>% 
-  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
+  mutate(losses = 17.17 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
   mutate(efficiencies = 0.906) %>% # If consumed - would be animal (ef.level = prey) 
   mutate(spp = tolower(spp)) 
 pelagic.miv.select$spp = gsub('chaoborus larvae', 'chaoborus.larvae', pelagic.miv.select$spp)
@@ -73,7 +73,7 @@ zoop.grouped.select = zoop.grouped %>%
   mutate(met.type = 'Invertebrate', 
          org.type = 'animal') %>% 
   mutate(spp = tolower(spp)) %>% 
-  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% 
+  mutate(losses = 17.17 * bodymass_g^(-0.29)) %>% 
   mutate(efficiencies = 0.906) 
 zoop.grouped.select
 
@@ -106,7 +106,7 @@ pelagic.miv.select = pelagic.miv %>%
          bodymass_g = weight.avg.g) %>%
   mutate(met.type = 'Invertebrate', 
          org.type = 'animal') %>% 
-  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
+  mutate(losses = 17.17 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
   mutate(efficiencies = 0.906) %>% # If consumed - would be animal (ef.level = prey) 
   mutate(spp = tolower(spp)) 
 pelagic.miv.select$spp = gsub('chaoborus larvae', 'chaoborus.larvae', pelagic.miv.select$spp)
@@ -127,7 +127,7 @@ zoop.grouped.select = zoop.grouped %>%
   mutate(met.type = 'Invertebrate', 
          org.type = 'animal') %>% 
   mutate(spp = tolower(spp)) %>% 
-  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% 
+  mutate(losses = 17.17 * bodymass_g^(-0.29)) %>% 
   mutate(efficiencies = 0.906) 
 zoop.grouped.select
 
@@ -161,7 +161,7 @@ pelagic.miv.select = pelagic.miv %>%
          bodymass_g = weight.avg.g) %>%
   mutate(met.type = 'Invertebrate', 
          org.type = 'animal') %>% 
-  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
+  mutate(losses = 17.17 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
   mutate(efficiencies = 0.906) %>% # If consumed - would be animal (ef.level = prey) 
   mutate(spp = tolower(spp)) %>% 
   mutate(biomass.g_perhec = biomass.g_perhec/2)
@@ -183,7 +183,7 @@ zoop.grouped.select = zoop.grouped %>%
   mutate(met.type = 'Invertebrate', 
          org.type = 'animal') %>% 
   mutate(spp = tolower(spp)) %>% 
-  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% 
+  mutate(losses = 17.17 * bodymass_g^(-0.29)) %>% 
   mutate(efficiencies = 0.906) %>%
   mutate(biomass.g_perhec = biomass.g_perhec/2)
 zoop.grouped.select
@@ -218,7 +218,7 @@ pelagic.miv.select = pelagic.miv %>%
          bodymass_g = weight.avg.g) %>%
   mutate(met.type = 'Invertebrate', 
          org.type = 'animal') %>% 
-  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
+  mutate(losses = 17.17 * bodymass_g^(-0.29)) %>% # Calculate losses using metabolic theory of ecology 
   mutate(efficiencies = 0.906) %>% # If consumed - would be animal (ef.level = prey) 
   mutate(spp = tolower(spp)) %>% 
   mutate(biomass.g_perhec = biomass.g_perhec*2)
@@ -240,7 +240,7 @@ zoop.grouped.select = zoop.grouped %>%
   mutate(met.type = 'Invertebrate', 
          org.type = 'animal') %>% 
   mutate(spp = tolower(spp)) %>% 
-  mutate(losses = 18.18 * bodymass_g^(-0.29)) %>% 
+  mutate(losses = 17.17 * bodymass_g^(-0.29)) %>% 
   mutate(efficiencies = 0.906) %>%
   mutate(biomass.g_perhec = biomass.g_perhec*2)
 zoop.grouped.select
@@ -262,7 +262,7 @@ lowfish.hizpmiv
   # hifish.lowzpmiv = 20% of walleye biomass; double fish; half zoop and miv
   # lowfish.hizpmiv = 20% of walleye biomass; half fish; double zoop-miv
 ### Select food web to flux  ### ==============================
-trout_pelagic.web = hifish.lowzpmiv
+trout_pelagic.web = base.wae_corrected
 
 
 ### Binary matrices ####============================ 
