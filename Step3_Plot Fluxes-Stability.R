@@ -355,6 +355,77 @@ lines(c(2014.5, 2014.5), c(log(0.00001), log(5000000000)), lty = 2)
 mtext(side = 2, line = 2.2, 'Preference Matrix')
 mtext(side = 1, line = 1.8, 'Year')
 
+# Just Preference Energy Flux Plot #=========================
+windows(height = 3, width = 5)
+par(mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
+par(tcl = -0.25)
+par(mgp = c(2, 0.6, 0))
+
+# Colors # 
+f.1 = '#253494'
+f.2 = '#2c7fb8' 
+f.3 = '#41b6c4' 
+f.4 = '#a1dab4'
+f.5 = 'gray30'
+transparent = rgb(255,255,255 ,maxColorValue = 255, alpha = 100)
+
+# Cisco -> fish # 
+plot(log(flux_kJ_d)~year, type = 'o', pch = 19, lwd =2, col = f.1, ylim = c(log(90), log(300000000)), yaxt = 'n', 
+     data = flux.1.preference, xlim = c(2001, 2019), xaxt = 'n',  
+     xlab = '', ylab = '', cex = 2, cex.lab = 2)
+axis(side=1, 
+     at = c(2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012,
+            2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020), 
+     labels = c('', '2001', '', '2003', '', '2005', '', '2007', '', '2009', '', '2011',
+                '', '2013', '', '2015', '', '2017', '', '2019', ''), 
+     cex = 3, las = 3)
+axis(side=2,
+     at=c(
+       # log(0.1),log(0.2),log(0.3),log(0.4),log(0.5),log(0.6),log(0.7),log(0.8),log(0.9),
+       # log(1),log(2),log(3),log(4),log(5),log(6),log(7),log(8),log(9),
+       # log(10),log(20),log(30),log(40),log(50),log(60),log(70),log(80),
+       log(100),log(200),log(300),log(400),log(500),log(600),log(700),log(800),log(900),log(1000),
+       log(2000),log(3000),log(4000),log(5000),log(6000),log(7000),log(8000),log(9000),log(10000), 
+       log(20000),log(30000),log(40000),log(50000),log(60000),log(70000),log(80000),log(90000), log(100000),
+       log(200000),log(300000),log(400000),log(500000),log(600000),log(700000),log(800000),log(900000), 
+       log(1000000), log(2000000), log(3000000), log(4000000), 
+       log(5000000), log(6000000), log(7000000), log(8000000), log(9000000),
+       log(10000000), log(20000000), log(30000000), log(40000000),
+       log(50000000), log(60000000), log(70000000), log(80000000), log(90000000), log(100000000), 
+       log(200000000), log(300000000)), #Where the tick marks should be drawn
+     labels = F,
+     # labels = c('100', '', '','','','','','','','1000',
+     #            '', '','','','','','','','10000',
+     #            '', '','','','','','','','100000',
+     #            '', '','','','','','','','1000000', 
+     #            '', '','','','','','','','10000000',
+     #            '', '','','','','','','','100000000', '200000000', '300000000'),
+     las=0, cex = 3)
+
+mtext(expression(`Log[Energy` ~ Flux~`]`) , side = 2, line = 3, cex = 1.2)
+mtext(expression(`(kJ`~ha^-1~d^-1~`)]`), side = 2, line = 1.5, cex = 1.2)
+mtext('Year', side = 1, cex = 1.2, line = 2.8)
+
+# pMIV -> LT & CSC# 
+points(log(flux_kJ_d)~year, type = 'o', pch = 15, lwd =2, col = f.2, cex = 2,
+       data = flux.2.preference, xlim = c(2001, 2019), xlab = '', ylab = '')
+
+# ZP -> CSC & pMIV # 
+points(log(flux_kJ_d)~year, type = 'o', pch = 17, lwd =2, col = f.3, cex = 2,
+       data = flux.3.preference, xlim = c(2001, 2019), xlab = '', ylab = '')
+
+# ZP -> CSC & pMIV & SWF # 
+points(log(flux_kJ_d)~year, type = 'o', pch = 17, lwd = 2, col = f.4, cex = 2,
+       data = flux.4.preference, xlim = c(2001, 2019), xlab = '', ylab = '')
+
+# Spiny -> CSC # 
+points(log(flux_kJ_d)~year, type = 'o', pch = 18, lwd =2, col = f.5, cex = 2,
+       data = flux.5.preference, xlim = c(2001, 2019), xlab = '', ylab = '')
+
+lines(c(2006.5,2006.5), c(log(0.0001), log(5000000000)), lty = 2)
+lines(c(2014.5, 2014.5), c(log(0.00001), log(5000000000)), lty = 2)
+
+
 # Stability Plot (Base) # ==============================
 windows(height = 6, width = 7)
 par(mfrow = c(2,1), mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
@@ -384,3 +455,23 @@ abline(v = 2014.5, lty = 2)
 abline(h = 0) # only for if values dip into negatives 
 mtext('Year', side = 1, line = 2, cex = 1)
 
+# Just preference stability plot #=========================
+windows(height = 3, width = 7)
+par(mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
+par(tcl = -0.25)
+par(mgp = c(2, 0.6, 0))
+
+plot(stability~year, type = 'o', pch = 19, lwd = 2, 
+     data = preference_stability, ylim = c(0, 350), 
+     xlim = c(2001,2019), xlab = '', ylab = '', xaxt = 'n')
+axis(side = 1, 
+     at = c(2000,2001,2002,2003,2004,2005,2006,2007,2008,
+            2009,2010,2011,2012,2013,2014,2015,2016,2017,
+            2018,2019,2020), 
+     labels = c('', '2001', '', '2003','','2005','','2007','','2009','','2011',
+                '', '2013','','2015','','2017','','2019',''), cex = 3, las = 3)
+mtext(expression(`Stability, ` ~ italic(s)), side = 2, line = 3, cex = 1.2)
+
+abline(v = 2006.5, lty = 2)
+abline(v = 2014.5, lty = 2)
+mtext('Year', side = 1, line = 2.8, cex = 1.2)
