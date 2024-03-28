@@ -14,7 +14,7 @@ fish
 
 fish.select = fish %>%
   select(year, spp, biomass.kg_perhec.raw, biomass.kg_perhec.corrected, biomass.kg_upperse.corrected, biomass.kg_lowerse.corrected) %>% 
-  filter(year != 2020) # Match other taxa record 
+  filter(year != 2023) # Match other taxa record 
 
 fish.raw = fish.select %>% 
   select(year, spp, biomass.kg_perhec.raw) %>% 
@@ -118,8 +118,7 @@ pmiv.select = pelagic.miv %>%
   mutate(biomass.mg_perhec = (biomass.g_perhec*1000), 
          biomass.mg.prop.err.se = (biomass.prop.err.se*1000)) %>% 
   mutate(biomass.mg_perm2 = biomass.mg_perhec/10000, 
-         biomass.mg.perm2.prop.err.se = biomass.mg.prop.err.se/10000) %>%
-  filter(year4 != 2020) # Match other taxa record # 
+         biomass.mg.perm2.prop.err.se = biomass.mg.prop.err.se/10000)
 pmiv.select
 max(pmiv.select$biomass.mg_perm2)
 min(pmiv.select$biomass.mg_perm2)
@@ -155,7 +154,6 @@ byth = 'gray60'
 # lep = '#f9afa6'
 # byth = 'gray30'
   
-
 plot(log(chaoborus)~year4, data = pmiv.final, type = 'o',col = chao, lwd = 2, pch = 17, cex = 2, ylim = c(log(0.001),log(300)),
      ylab = '', xlab = '', yaxt = 'n', col.axis = transparent)
 axis(side=2,
@@ -215,7 +213,7 @@ zoop.grouped.select = zoop.grouped %>%
   select(year, spp, biomass.mg_perm2, se_mg.perm2, biomass_ugL)
 zoop.grouped.select
 
-max(zoop.grouped.select$biomass.mg_perm2) # 5000
+max(zoop.grouped.select$biomass.mg_perm2) # 5300
 min(zoop.grouped.select$biomass.mg_perm2) # 20
 
 zp.wide = zoop.grouped.select%>% 
