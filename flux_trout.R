@@ -4,7 +4,8 @@ library(lubridate)
 library(fluxweb)
 
 # Load in biomass datasets # 
-fish = read_csv('trout_fish_biomass_selectpelagic.csv')
+fish = read_csv('trout_fish_biomass_selectpelagic.csv') %>% 
+  filter(year != 2023) # Match other two records
 pelagic.miv = read_csv('trout_pmiv_biomass.reduced.csv')
 zoop.grouped = read_csv('trout_pzoop_grouped.alldates.csv')
 
@@ -140,6 +141,10 @@ join1 = rbind(fish.select, pelagic.miv.select)
 base.wae_corrected = rbind(join1, zoop.grouped.select) %>% arrange(year)
 base.wae_corrected
 
+# save for alternate stability analysis # ==========================
+library(here)
+write_csv(base.wae_corrected, 'trout fw.csv')
+
 # Trout Fluxing - High Fish; Low Zoops - MIV  #==============================
 
 # Set up fluxweb dataframe (long format + wide matrix) # 
@@ -262,14 +267,14 @@ lowfish.hizpmiv
   # hifish.lowzpmiv = 20% of walleye biomass; double fish; half zoop and miv
   # lowfish.hizpmiv = 20% of walleye biomass; half fish; double zoop-miv
 ### Select food web to flux  ### ==============================
-trout_pelagic.web = base.wae_corrected
+trout_pelagic.web = lowfish.hizpmiv
 
 
 ### Binary matrices ####============================ 
 early.mat.b = read_csv('matrix_01.14.csv')
 early.mat.b = as.matrix(early.mat.b)
 
-late.mat.b = read_csv('matrix_15.20.csv')
+late.mat.b = read_csv('matrix_15.22.csv')
 late.mat.b = as.matrix(late.mat.b)
 
 
@@ -1475,7 +1480,7 @@ stability.estimate_final.b = bind_rows(stab01, stab02, stab03, stab04, stab05, s
 early.mat.p = read_csv('matrix_01.14_preference.csv')
 early.mat.p = as.matrix(early.mat.p)
 
-late.mat.p = read_csv('matrix_15.20_preference.csv')
+late.mat.p = read_csv('matrix_15.22_preference.csv')
 late.mat.p = as.matrix(late.mat.p)
 
 # Trout Flux Run - Preference #==============================
@@ -1529,9 +1534,12 @@ basal.gr = growth.01$growth.rate
 basal.gr
 
 # Calculate stability # 
-stab01 = stability.value(flux01.stability, biom01, loss01, effic01, basal.gr, 
+stab01 = stability.value(val.mat = flux01.stability, biomasses = biom01, 
+                         losses = loss01, efficiencies = effic01, growth.rate = basal.gr, 
                          bioms.prefs = T, bioms.losses = T, ef.level = 'prey')
 stab01
+
+
 
 stab01 = data.frame(stab01) 
 stab01 = stab01 %>% 
@@ -2601,83 +2609,198 @@ stab19 = stab19 %>%
 stab19
 
 
-# ## 2020 ==
+# 2020 # 
+d20 = trout_pelagic.web %>% filter(year == 2020) %>% filter(spp != 'lake.trout' & spp != 'bythotrephes')
+d20 # no observed bythotrephes in 2020 
 
-## No zooplankton data for 2020 :( ## 
+mat.20 = late.mat.p[-c(2,4),-c(2,4)]
+mat.20
 
-# d20 = trout_pelagic.web %>% filter(year == 2020) %>% filter(spp != 'lake.trout')
-# d20
-# 
-# mat.20 = late.mat.p[-c(2),-c(2)]
-# mat.20
-# 
-# biom20 = c(d20$biomass.g_perhec) # biomass # 
-# loss20 = c(d20$losses) # metabolic losses 
-# effic20 = c(d20$efficiencies) # efficiencies 
-# 
-# flux20 = fluxing(mat.20, biom20, loss20, effic20, 
-#                  bioms.prefs = TRUE, # scale species diet preferences to biomass of their prey 
-#                  bioms.losses = TRUE, # metabolic loss defined per unit biomass 
-#                  ef.level = 'prey') # efficiency defined according to prey (efficiency by which it will be assimilated) 
-# 
-# flux20.stability = flux20
-# flux20 = as_tibble(flux20)
-# 
-# colnames = colnames(flux20)
-# colnames
-# 
-# flux20$prey = colnames
-# flux20
-# flux20 = column_to_rownames(flux20, var = 'prey')
-# 
-# # Outgoing flux # 
-# fluxsums = as_tibble(rowSums(flux20)) 
-# fluxsums$fluxfrom = rownames(flux20)
-# fluxfrom20 = pivot_wider(fluxsums, names_from = 'fluxfrom', values_from = 'value')
-# fluxfrom20 = mutate(fluxfrom20, year = 2020)
-# outgoing20 = fluxfrom20 %>% 
-#   mutate(lake.trout = NA) %>% 
-#   select(year, cisco, lake.trout, walleye, bythotrephes, chaoborus.larvae, leptodora, mysis, cladocera, copepoda, rotifera)
-# outgoing20
-# 
-# # Make growth rate for zoops (acting as basal in this web) 
-# growth.20 = d20 %>% 
-#   mutate(growth.rate = 0.71*bodymass_g^(-0.25))
-# growth.20
-# growth.20[growth.20$spp == 'cisco' | growth.20$spp == 'lake.trout' | growth.20$spp == 'walleye' | 
-#             growth.20$spp == 'bythotrephes' | growth.20$spp == 'chaoborus.larvae' | 
-#             growth.20$spp == 'leptodora' | growth.20$spp == 'mysis', 'growth.rate'] <- NA 
-# growth.20
-# 
-# basal.gr = growth.20$growth.rate
-# basal.gr
-# 
-# # Calculate stability # 
-# stab20 = stability.value(flux20.stability, biom20, loss20, effic20, basal.gr, 
-#                          bioms.prefs = T, bioms.losses = T, ef.level = 'prey')
-# stab20
-# 
-# stab20 = data.frame(stab20) 
-# stab20 = stab20 %>% 
-#   rename(stability = stab20) %>% 
-#   mutate(year = 2020)
-# stab20
+biom20 = c(d20$biomass.g_perhec) # biomass # 
+loss20 = c(d20$losses) # metabolic losses 
+effic20 = c(d20$efficiencies) # efficiencies 
+
+flux20 = fluxing(mat.20, biom20, loss20, effic20, 
+                 bioms.prefs = TRUE, # scale species diet preferences to biomass of their prey 
+                 bioms.losses = TRUE, # metabolic loss defined per unit biomass 
+                 ef.level = 'prey') # efficiency defined according to prey (efficiency by which it will be assimilated) 
+
+flux20.stability = flux20
+flux20 = as_tibble(flux20)
+
+colnames = colnames(flux20)
+colnames
+
+flux20$prey = colnames
+flux20
+flux20 = column_to_rownames(flux20, var = 'prey')
+
+# Outgoing flux # 
+fluxsums = as_tibble(rowSums(flux20)) 
+fluxsums$fluxfrom = rownames(flux20)
+fluxfrom20 = pivot_wider(fluxsums, names_from = 'fluxfrom', values_from = 'value')
+fluxfrom20 = mutate(fluxfrom20, year = 2020)
+outgoing20 = fluxfrom20 %>% 
+  mutate(lake.trout = NA, 
+         bythotrephes = NA) %>% 
+  select(year, cisco, lake.trout, walleye, bythotrephes, chaoborus.larvae, leptodora, mysis, cladocera, copepoda, rotifera)
+outgoing20
+
+# Make growth rate for zoops (acting as basal in this web) 
+growth.20 = d20 %>% 
+  mutate(growth.rate = 0.71*bodymass_g^(-0.25))
+growth.20
+growth.20[growth.20$spp == 'cisco' | growth.20$spp == 'lake.trout' | growth.20$spp == 'walleye' | 
+            growth.20$spp == 'bythotrephes' | growth.20$spp == 'chaoborus.larvae' | 
+            growth.20$spp == 'leptodora' | growth.20$spp == 'mysis', 'growth.rate'] <- NA 
+growth.20
+
+basal.gr = growth.20$growth.rate
+basal.gr
+
+# Calculate stability # 
+stab20 = stability.value(flux20.stability, biom20, loss20, effic20, basal.gr, 
+                         bioms.prefs = T, bioms.losses = T, ef.level = 'prey')
+stab20
+
+stab20 = data.frame(stab20) 
+stab20 = stab20 %>% 
+  rename(stability = stab20) %>% 
+  mutate(year = 2020)
+stab20
+
+# 2021 # 
+d21 = trout_pelagic.web %>% filter(year == 2021) %>% filter(spp != 'lake.trout')
+d21
+
+mat.21 = late.mat.p[-c(2),-c(2)]
+mat.21
+
+biom21 = c(d21$biomass.g_perhec) # biomass # 
+loss21 = c(d21$losses) # metabolic losses 
+effic21 = c(d21$efficiencies) # efficiencies 
+
+flux21 = fluxing(mat.21, biom21, loss21, effic21, 
+                 bioms.prefs = TRUE, # scale species diet preferences to biomass of their prey 
+                 bioms.losses = TRUE, # metabolic loss defined per unit biomass 
+                 ef.level = 'prey') # efficiency defined according to prey (efficiency by which it will be assimilated) 
+
+flux21.stability = flux21
+flux21 = as_tibble(flux21)
+
+colnames = colnames(flux21)
+colnames
+
+flux21$prey = colnames
+flux21
+flux21 = column_to_rownames(flux21, var = 'prey')
+
+# Outgoing flux # 
+fluxsums = as_tibble(rowSums(flux21)) 
+fluxsums$fluxfrom = rownames(flux21)
+fluxfrom21 = pivot_wider(fluxsums, names_from = 'fluxfrom', values_from = 'value')
+fluxfrom21 = mutate(fluxfrom21, year = 2021)
+outgoing21 = fluxfrom21 %>% 
+  mutate(lake.trout = NA) %>% 
+  select(year, cisco, lake.trout, walleye, bythotrephes, chaoborus.larvae, leptodora, mysis, cladocera, copepoda, rotifera)
+outgoing21
+
+# Make growth rate for zoops (acting as basal in this web) 
+growth.21 = d21 %>% 
+  mutate(growth.rate = 0.71*bodymass_g^(-0.25))
+growth.21
+growth.21[growth.21$spp == 'cisco' | growth.21$spp == 'lake.trout' | growth.21$spp == 'walleye' | 
+            growth.21$spp == 'bythotrephes' | growth.21$spp == 'chaoborus.larvae' | 
+            growth.21$spp == 'leptodora' | growth.21$spp == 'mysis', 'growth.rate'] <- NA 
+growth.21
+
+basal.gr = growth.21$growth.rate
+basal.gr
+
+# Calculate stability # 
+stab21 = stability.value(flux21.stability, biom21, loss21, effic21, basal.gr, 
+                         bioms.prefs = T, bioms.losses = T, ef.level = 'prey')
+stab21
+
+stab21 = data.frame(stab21) 
+stab21 = stab21 %>% 
+  rename(stability = stab21) %>% 
+  mutate(year = 2021)
+stab21
+
+# 2022 # 
+d22 = trout_pelagic.web %>% filter(year == 2022)
+d22
+
+mat.22 = late.mat.p
+mat.22
+
+biom22 = c(d22$biomass.g_perhec) # biomass # 
+loss22 = c(d22$losses) # metabolic losses 
+effic22 = c(d22$efficiencies) # efficiencies 
+
+flux22 = fluxing(mat.22, biom22, loss22, effic22, 
+                 bioms.prefs = TRUE, # scale species diet preferences to biomass of their prey 
+                 bioms.losses = TRUE, # metabolic loss defined per unit biomass 
+                 ef.level = 'prey') # efficiency defined according to prey (efficiency by which it will be assimilated) 
+
+flux22.stability = flux22
+flux22 = as_tibble(flux22)
+
+colnames = colnames(flux22)
+colnames
+
+flux22$prey = colnames
+flux22
+flux22 = column_to_rownames(flux22, var = 'prey')
+
+# Outgoing flux # 
+fluxsums = as_tibble(rowSums(flux22)) 
+fluxsums$fluxfrom = rownames(flux22)
+fluxfrom22 = pivot_wider(fluxsums, names_from = 'fluxfrom', values_from = 'value')
+fluxfrom22 = mutate(fluxfrom22, year = 2022)
+outgoing22 = fluxfrom22 %>% 
+  select(year, cisco, lake.trout, walleye, bythotrephes, chaoborus.larvae, leptodora, mysis, cladocera, copepoda, rotifera)
+outgoing22
+
+# Make growth rate for zoops (acting as basal in this web) 
+growth.22 = d22 %>% 
+  mutate(growth.rate = 0.71*bodymass_g^(-0.25))
+growth.22
+growth.22[growth.22$spp == 'cisco' | growth.22$spp == 'lake.trout' | growth.22$spp == 'walleye' | 
+            growth.22$spp == 'bythotrephes' | growth.22$spp == 'chaoborus.larvae' | 
+            growth.22$spp == 'leptodora' | growth.22$spp == 'mysis', 'growth.rate'] <- NA 
+growth.22
+
+basal.gr = growth.22$growth.rate
+basal.gr
+
+# Calculate stability # 
+stab22 = stability.value(flux22.stability, biom22, loss22, effic22, basal.gr, 
+                         bioms.prefs = T, bioms.losses = T, ef.level = 'prey')
+stab22
+
+stab22 = data.frame(stab22) 
+stab22 = stab22 %>% 
+  rename(stability = stab22) %>% 
+  mutate(year = 2022)
+stab22
 
 # Base Dataset Fluxes in J/year + Stability - Preference #===========================
 outgoing.flux_final.p = bind_rows(outgoing01, outgoing02, outgoing03, outgoing04, outgoing05, outgoing06, outgoing07, 
                                 outgoing08, outgoing09, outgoing10, outgoing11, outgoing12, outgoing13, outgoing14, 
-                                outgoing15, outgoing16, outgoing17, outgoing18, outgoing19)
+                                outgoing15, outgoing16, outgoing17, outgoing18, outgoing19, outgoing20, outgoing21, 
+                                outgoing22)
 
 stability.estimate_final.p = bind_rows(stab01, stab02, stab03, stab04, stab05, stab06, stab07, stab08, stab09,
                                      stab10, stab11, stab12, stab13, stab14, 
-                                     stab15, stab16, stab17, stab18, stab19)  
+                                     stab15, stab16, stab17, stab18, stab19, stab20, stab21, stab22)  
 
 # Make flux datasets #===============================
 
-# Binary Matrix Dtasets #
 # Check line 265 to confirm what dataset was fluxed # 
 binary_flux = outgoing.flux_final.b
 binary_stability = stability.estimate_final.b
-# Make sure binary data was run first # 
+ 
 preference_flux = outgoing.flux_final.p
 preference_stability = stability.estimate_final.p

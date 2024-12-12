@@ -63,14 +63,23 @@ sd.cvs.mat.18 = c()
 sd.cvs.eff.19 = c()
 sd.cvs.los.19 = c()
 sd.cvs.mat.19 = c()
-
+sd.cvs.eff.20 = c()
+sd.cvs.los.20 = c()
+sd.cvs.mat.20 = c()
+sd.cvs.eff.21 = c()
+sd.cvs.los.21 = c()
+sd.cvs.mat.21 = c()
+sd.cvs.eff.22 = c()
+sd.cvs.los.22 = c()
+sd.cvs.mat.22 = c()
 
 seq = seq(0, 0.12, 0.01)
+seq
 seq.eff = seq[1:11]
 
 # Ignore efficiencies error (it's because you can't have greater than 1 efficiency )
 windows(height = 6.5, width = 8)
-par(mfrow = c(4,5), mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
+par(mfrow = c(5,5), mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
 par(tcl = -0.25)
 par(mgp = c(2, 0.6, 0))
 
@@ -852,17 +861,25 @@ sd.cvs.mat.18 = c()
 sd.cvs.eff.19 = c()
 sd.cvs.los.19 = c()
 sd.cvs.mat.19 = c()
-
+sd.cvs.eff.20 = c()
+sd.cvs.los.20 = c()
+sd.cvs.mat.20 = c()
+sd.cvs.eff.21 = c()
+sd.cvs.los.21 = c()
+sd.cvs.mat.21 = c()
+sd.cvs.eff.22 = c()
+sd.cvs.los.22 = c()
+sd.cvs.mat.22 = c()
 
 seq = seq(0, 0.12, 0.01)
+seq
 seq.eff = seq[1:11]
 
 # Ignore efficiencies error (it's because you can't have greater than 1 efficiency )
-windows(height = 6.5, width = 8)
-par(mfrow = c(4,5), mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
+windows(height = 7.5, width = 9)
+par(mfrow = c(5,5), mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
 par(tcl = -0.25)
 par(mgp = c(2, 0.6, 0))
-
 
 # start 
 for (var in seq(0, 0.12, 0.01)){
@@ -1532,7 +1549,7 @@ axis(side =2, at = c(0, 0.02, 0.04, .06,.08,.1), labels = F)
 points(sd.cvs.los.18 ~ seq.eff, col = '#7fc97f', pch = 19) 
 points(sd.cvs.mat.18 ~ seq.eff, col = '#beaed4', pch = 19) 
 abline(a = 0, b = 1, lty = 2) 
-mtext(side =1, 'Variation in parameters', line = 2)
+
 text(0.11, 0.005, '2018')
 
 for (var in seq(0, 0.12, 0.01)){
@@ -1571,11 +1588,116 @@ points(sd.cvs.mat.19 ~ seq.eff, col = '#beaed4', pch = 19)
 abline(a = 0, b = 1, lty = 2) 
 text(0.11, 0.005, '2019')
 
-#empty plot 
-plot(1, type = "n", xlab = "", yaxt = 'n', xaxt='n',
-     ylab = "", xlim = c(0, 5), 
-     ylim = c(0, 5), col.axis = transparent, bty = 'n')
-text(2,2, 'Preference\nInteraction Matrix', cex = 1, font = 2)
+
+for (var in seq(0, 0.12, 0.01)){
+  cat('var: ', var, '\n')
+  # efficiencies 
+  res=sensitivity(fluxing, 'efficiencies', var,50,
+                  mat=mat.20,
+                  biomasses=d20$biomass.g_perhec,
+                  losses=d20$losses,
+                  efficiencies=d20$efficiencies)
+  sd.cvs.eff.20=c(sd.cvs.eff.20, mean(res[[2]], na.rm=T))
+  #for losses
+  res=sensitivity(fluxing,'losses',var,50, 
+                  mat=mat.20, 
+                  biomasses=d20$biomass.g_perhec, 
+                  losses=d20$losses, 
+                  efficiencies=d20$efficiencies) 
+  sd.cvs.los.20=c(sd.cvs.los.20,mean(res[[2]],na.rm=T))
+  #for preferences
+  res=sensitivity(fluxing, 'mat',var,50, 
+                  mat=mat.20,
+                  biomasses=d20$biomass.g_perhec,
+                  losses=d20$losses,
+                  efficiencies=d20$efficiencies)
+  sd.cvs.mat.20=c(sd.cvs.mat.20,mean(res[[2]],na.rm=T))
+}
+
+# Preference matrix # 
+plot(sd.cvs.eff.20 ~ seq.eff, xlim = c(0,0.12) , ylim = c(0,0.1), 
+     xlab = 'variation in parameters', 
+     ylab = 'observed departure to original results', 
+     pch = 19)
+axis(side =2, at = c(0, 0.02, 0.04, .06,.08,.1), labels = F)
+points(sd.cvs.los.20 ~ seq.eff, col = '#7fc97f', pch = 19) 
+points(sd.cvs.mat.20 ~ seq.eff, col = '#beaed4', pch = 19) 
+abline(a = 0, b = 1, lty = 2) 
+text(0.11, 0.005, '2020')
+
+for (var in seq(0, 0.12, 0.01)){
+  cat('var: ', var, '\n')
+  # efficiencies 
+  res=sensitivity(fluxing, 'efficiencies', var,50,
+                  mat=mat.21,
+                  biomasses=d21$biomass.g_perhec,
+                  losses=d21$losses,
+                  efficiencies=d21$efficiencies)
+  sd.cvs.eff.21=c(sd.cvs.eff.21, mean(res[[2]], na.rm=T))
+  #for losses
+  res=sensitivity(fluxing,'losses',var,50, 
+                  mat=mat.21, 
+                  biomasses=d21$biomass.g_perhec, 
+                  losses=d21$losses, 
+                  efficiencies=d21$efficiencies) 
+  sd.cvs.los.21=c(sd.cvs.los.21,mean(res[[2]],na.rm=T))
+  #for preferences
+  res=sensitivity(fluxing, 'mat',var,50, 
+                  mat=mat.21,
+                  biomasses=d21$biomass.g_perhec,
+                  losses=d21$losses,
+                  efficiencies=d21$efficiencies)
+  sd.cvs.mat.21=c(sd.cvs.mat.21,mean(res[[2]],na.rm=T))
+}
+
+# Preference matrix # 
+plot(sd.cvs.eff.21 ~ seq.eff, xlim = c(0,0.12) , ylim = c(0,0.1), 
+     xlab = 'variation in parameters', 
+     ylab = 'observed departure to original results', 
+     pch = 19)
+axis(side =2, at = c(0, 0.02, 0.04, .06,.08,.1), labels = F)
+points(sd.cvs.los.21 ~ seq.eff, col = '#7fc97f', pch = 19) 
+points(sd.cvs.mat.21 ~ seq.eff, col = '#beaed4', pch = 19) 
+abline(a = 0, b = 1, lty = 2) 
+text(0.11, 0.005, '2021')
+mtext(side =1, 'Variation in parameters', line = 2)
+
+for (var in seq(0, 0.12, 0.01)){
+  cat('var: ', var, '\n')
+  # efficiencies 
+  res=sensitivity(fluxing, 'efficiencies', var,50,
+                  mat=mat.22,
+                  biomasses=d22$biomass.g_perhec,
+                  losses=d22$losses,
+                  efficiencies=d22$efficiencies)
+  sd.cvs.eff.22=c(sd.cvs.eff.22, mean(res[[2]], na.rm=T))
+  #for losses
+  res=sensitivity(fluxing,'losses',var,50, 
+                  mat=mat.22, 
+                  biomasses=d22$biomass.g_perhec, 
+                  losses=d22$losses, 
+                  efficiencies=d22$efficiencies) 
+  sd.cvs.los.22=c(sd.cvs.los.22,mean(res[[2]],na.rm=T))
+  #for preferences
+  res=sensitivity(fluxing, 'mat',var,50, 
+                  mat=mat.22,
+                  biomasses=d22$biomass.g_perhec,
+                  losses=d22$losses,
+                  efficiencies=d22$efficiencies)
+  sd.cvs.mat.22=c(sd.cvs.mat.22,mean(res[[2]],na.rm=T))
+}
+
+# Preference matrix # 
+plot(sd.cvs.eff.22 ~ seq.eff, xlim = c(0,0.12) , ylim = c(0,0.1), 
+     xlab = 'variation in parameters', 
+     ylab = 'observed departure to original results', 
+     pch = 19)
+axis(side =2, at = c(0, 0.02, 0.04, .06,.08,.1), labels = F)
+points(sd.cvs.los.22 ~ seq.eff, col = '#7fc97f', pch = 19) 
+points(sd.cvs.mat.22 ~ seq.eff, col = '#beaed4', pch = 19) 
+abline(a = 0, b = 1, lty = 2) 
+text(0.11, 0.005, '2022')
+
 
 # Stability function - binary matrix # =================================
 
@@ -2475,18 +2597,24 @@ sd.cvs.gr.18 = c()
 sd.cvs.eff.19 = c()
 sd.cvs.los.19 = c()
 sd.cvs.gr.19 = c()
-
+sd.cvs.eff.20 = c()
+sd.cvs.los.20 = c()
+sd.cvs.gr.20 = c()
+sd.cvs.eff.21 = c()
+sd.cvs.los.21 = c()
+sd.cvs.gr.21 = c()
+sd.cvs.eff.22 = c()
+sd.cvs.los.22 = c()
+sd.cvs.gr.22 = c()
 
 seq = seq(0, 0.12, 0.01)
 seq.eff = seq[1:13]
 
 # Ignore efficiencies error (it's because you can't have greater than 1 efficiency )
-windows(height = 6.5, width = 8)
-par(mfrow = c(4,5), mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
+windows(height = 7.5, width = 9)
+par(mfrow = c(5,5), mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
 par(tcl = -0.25)
 par(mgp = c(2, 0.6, 0))
-
-
 
 # start 
 for (var in seq(0, 0.12, 0.01)){
@@ -2518,7 +2646,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.01 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.01 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2565,7 +2693,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.02 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.02 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2605,7 +2733,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.03 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.03 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2645,7 +2773,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.04 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.04 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2684,7 +2812,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.05 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.05 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2724,7 +2852,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.06 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.06 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2763,7 +2891,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.07 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.07 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2803,7 +2931,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.08 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.08 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2842,7 +2970,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.09 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.09 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2881,7 +3009,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.10 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.10 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2920,7 +3048,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.11 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.11 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2959,7 +3087,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.12 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.12 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -2998,7 +3126,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.13 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.13 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -3037,7 +3165,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.14 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.14 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -3076,7 +3204,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.15 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), xaxt = 'n',
+plot(sd.cvs.gr.15 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), xaxt = 'n',
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -3115,7 +3243,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.16 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), 
+plot(sd.cvs.gr.16 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), 
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -3154,7 +3282,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.17 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5),
+plot(sd.cvs.gr.17 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3),
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -3193,7 +3321,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.18 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), 
+plot(sd.cvs.gr.18 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), 
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -3202,8 +3330,6 @@ axis(side =1, at = c(0,.02,.04,.06,.08,.10,.12), labels = F)
 # points(sd.cvs.gr.18 ~ seq.eff, col = '#beaed4', pch = 19) 
 abline(a = 0, b = 1, lty = 2) 
 text(0.11, 0.02, '2018')
-mtext(side =1, 'Variation in parameters', line = 2)
-
 
 for (var in seq(0, 0.12, 0.01)){
   cat('var: ', var, '\n')
@@ -3234,7 +3360,7 @@ for (var in seq(0, 0.12, 0.01)){
 }
 
 # Preference matrix # 
-plot(sd.cvs.gr.19 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.5), 
+plot(sd.cvs.gr.19 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), 
      xlab = 'variation in parameters', 
      ylab = 'observed departure to original results', 
      pch = 19)
@@ -3244,11 +3370,124 @@ axis(side =1, at = c(0,.02,.04,.06,.08,.10,.12), labels = F)
 abline(a = 0, b = 1, lty = 2) 
 text(0.11, 0.02, '2019')
 
-#empty plot 
-plot(1, type = "n", xlab = "", yaxt = 'n', xaxt='n',
-     ylab = "", xlim = c(0, 5), 
-     ylim = c(0, 5), col.axis = transparent, bty = 'n')
-text(2,2, 'Preference\nInteraction Matrix', cex = 1, font = 2)
+for (var in seq(0, 0.12, 0.01)){
+  cat('var: ', var, '\n')
+  # efficiencies 
+  res=sensitivity(stability.value, 'efficiencies', var,50,
+                  val.mat=flux20.stability,
+                  biomasses=d20$biomass.g_perhec,
+                  losses=d20$losses,
+                  efficiencies=d20$efficiencies, 
+                  growth.rate=growth.20$growth.rate)
+  sd.cvs.eff.20=c(sd.cvs.eff.20, mean(res[[2]], na.rm=T))
+  #for losses
+  res=sensitivity(stability.value,'losses',var,50, 
+                  val.mat=flux20.stability, 
+                  biomasses=d20$biomass.g_perhec, 
+                  losses=d20$losses, 
+                  efficiencies=d20$efficiencies, 
+                  growth.rate=growth.20$growth.rate) 
+  sd.cvs.los.20=c(sd.cvs.los.20,mean(res[[2]],na.rm=T))
+  #for preferences
+  res=sensitivity(stability.value, 'growth.rate',var,50, 
+                  val.mat=flux20.stability,
+                  biomasses=d20$biomass.g_perhec,
+                  losses=d20$losses,
+                  efficiencies=d20$efficiencies, 
+                  growth.rate=growth.20$growth.rate)
+  sd.cvs.gr.20=c(sd.cvs.gr.20,mean(res[[2]],na.rm=T))
+}
+
+# Preference matrix # 
+plot(sd.cvs.gr.20 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), 
+     xlab = 'variation in parameters', 
+     ylab = 'observed departure to original results', 
+     pch = 19)
+axis(side =1, at = c(0,.02,.04,.06,.08,.10,.12), labels = F)
+# points(sd.cvs.los.20 ~ seq.eff, col = '#7fc97f', pch = 19) 
+# points(sd.cvs.gr.20 ~ seq.eff, col = '#beaed4', pch = 19) 
+abline(a = 0, b = 1, lty = 2) 
+text(0.11, 0.02, '2020')
+
+for (var in seq(0, 0.12, 0.01)){
+  cat('var: ', var, '\n')
+  # efficiencies 
+  res=sensitivity(stability.value, 'efficiencies', var,50,
+                  val.mat=flux21.stability,
+                  biomasses=d21$biomass.g_perhec,
+                  losses=d21$losses,
+                  efficiencies=d21$efficiencies, 
+                  growth.rate=growth.21$growth.rate)
+  sd.cvs.eff.21=c(sd.cvs.eff.21, mean(res[[2]], na.rm=T))
+  #for losses
+  res=sensitivity(stability.value,'losses',var,50, 
+                  val.mat=flux21.stability, 
+                  biomasses=d21$biomass.g_perhec, 
+                  losses=d21$losses, 
+                  efficiencies=d21$efficiencies, 
+                  growth.rate=growth.21$growth.rate) 
+  sd.cvs.los.21=c(sd.cvs.los.21,mean(res[[2]],na.rm=T))
+  #for preferences
+  res=sensitivity(stability.value, 'growth.rate',var,50, 
+                  val.mat=flux21.stability,
+                  biomasses=d21$biomass.g_perhec,
+                  losses=d21$losses,
+                  efficiencies=d21$efficiencies, 
+                  growth.rate=growth.21$growth.rate)
+  sd.cvs.gr.21=c(sd.cvs.gr.21,mean(res[[2]],na.rm=T))
+}
+
+# Preference matrix # 
+plot(sd.cvs.gr.21 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), 
+     xlab = 'variation in parameters', 
+     ylab = 'observed departure to original results', 
+     pch = 19)
+axis(side =1, at = c(0,.02,.04,.06,.08,.10,.12), labels = F)
+# points(sd.cvs.los.21 ~ seq.eff, col = '#7fc97f', pch = 19) 
+# points(sd.cvs.gr.21 ~ seq.eff, col = '#beaed4', pch = 19) 
+abline(a = 0, b = 1, lty = 2) 
+text(0.11, 0.06, '2021')
+mtext(side =1, 'Variation in parameters', line = 2)
+
+for (var in seq(0, 0.12, 0.01)){
+  cat('var: ', var, '\n')
+  # efficiencies 
+  res=sensitivity(stability.value, 'efficiencies', var,50,
+                  val.mat=flux22.stability,
+                  biomasses=d22$biomass.g_perhec,
+                  losses=d22$losses,
+                  efficiencies=d22$efficiencies, 
+                  growth.rate=growth.22$growth.rate)
+  sd.cvs.eff.22=c(sd.cvs.eff.22, mean(res[[2]], na.rm=T))
+  #for losses
+  res=sensitivity(stability.value,'losses',var,50, 
+                  val.mat=flux22.stability, 
+                  biomasses=d22$biomass.g_perhec, 
+                  losses=d22$losses, 
+                  efficiencies=d22$efficiencies, 
+                  growth.rate=growth.22$growth.rate) 
+  sd.cvs.los.22=c(sd.cvs.los.22,mean(res[[2]],na.rm=T))
+  #for preferences
+  res=sensitivity(stability.value, 'growth.rate',var,50, 
+                  val.mat=flux22.stability,
+                  biomasses=d22$biomass.g_perhec,
+                  losses=d22$losses,
+                  efficiencies=d22$efficiencies, 
+                  growth.rate=growth.22$growth.rate)
+  sd.cvs.gr.22=c(sd.cvs.gr.22,mean(res[[2]],na.rm=T))
+}
+
+# Preference matrix # 
+plot(sd.cvs.gr.22 ~ seq.eff, xlim = c(0,0.12), ylim = c(0,0.3), 
+     xlab = 'variation in parameters', 
+     ylab = 'observed departure to original results', 
+     pch = 19)
+axis(side =1, at = c(0,.02,.04,.06,.08,.10,.12), labels = F)
+# points(sd.cvs.los.22 ~ seq.eff, col = '#7fc97f', pch = 19) 
+# points(sd.cvs.gr.22 ~ seq.eff, col = '#beaed4', pch = 19) 
+abline(a = 0, b = 1, lty = 2) 
+text(0.11, 0.02, '2022')
+
 
 # Stability function loss & efficiency- Binary matrix # ====================
 

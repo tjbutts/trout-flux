@@ -13,36 +13,42 @@ zoop.grouped = read_csv('trout_pzoop_grouped.alldates.csv')
 fish
 
 fish.select = fish %>%
-  select(year, spp, biomass.kg_perhec.raw, biomass.kg_perhec.corrected, biomass.kg_upperse.corrected, biomass.kg_lowerse.corrected) %>% 
-  filter(year != 2023) # Match other taxa record 
+  select(year, spp, biomass.kg_perhec.raw, biomass.kg_perhec.corrected, biomass.kg_upperse.corrected, biomass.kg_lowerse.corrected)  # Match other taxa record 
 
 fish.raw = fish.select %>% 
   select(year, spp, biomass.kg_perhec.raw) %>% 
+  mutate(biomass.g_perhec.raw = biomass.kg_perhec.raw*1000)
+fish.raw
+
+fish.raw = fish.raw %>%
   pivot_wider(id_cols = year, 
               names_from = spp, 
-              values_from = biomass.kg_perhec.raw)
+              values_from = biomass.g_perhec.raw)
 fish.raw
 
 corrected.wae = fish.select %>% 
   select(year, spp, biomass.kg_perhec.corrected) %>% 
+  mutate(biomass.g_perhec.corrected = biomass.kg_perhec.corrected*1000) %>%
   pivot_wider(id_cols = year, 
               names_from = spp, 
-              values_from = biomass.kg_perhec.corrected) %>% 
+              values_from = biomass.g_perhec.corrected) %>% 
   rename(p20.walleye = walleye)
 
 upperse = fish.select %>% 
   select(year, spp, biomass.kg_upperse.corrected) %>% 
+  mutate(biomass.g_upperse.corrected = biomass.kg_upperse.corrected*1000) %>%
   pivot_wider(id_cols = year, 
               names_from = spp, 
-              values_from = biomass.kg_upperse.corrected) %>%
+              values_from = biomass.g_upperse.corrected) %>%
   rename(c.se.u = cisco, lt.se.u = lake.trout, w.se.u = walleye)
 upperse
 
 lowerse = fish.select %>% 
   select(year, spp, biomass.kg_lowerse.corrected) %>% 
+  mutate(biomass.g_lowerse.corrected = biomass.kg_lowerse.corrected*1000) %>%
   pivot_wider(id_cols = year, 
               names_from = spp, 
-              values_from = biomass.kg_lowerse.corrected)  %>%
+              values_from = biomass.g_lowerse.corrected)  %>%
   rename(c.se.l = cisco, lt.se.l = lake.trout, w.se.l = walleye)
 lowerse
 
@@ -59,7 +65,7 @@ par(mfrow =c(3,1), mar = c(0.5,1,1,0.5), oma = c(4,4,.5,.5))
 par(tcl = -0.25)
 par(mgp = c(2, 0.6, 0))
 
-lt = '#A77600' 
+lt = rgb(167, 118, 0, max = 255, alpha = 225)
 wae = rgb(167, 118,0, max = 255, alpha = 175)
 cis = rgb(167, 118,0, max = 255, alpha = 100)
 
@@ -85,17 +91,26 @@ transparent = rgb(255,255,255 ,maxColorValue = 255, alpha = 100)
 #        bty = 'n')
 
 # Log all three plots option # 
-plot(log(cisco)~year, data = fish.raw, type = 'o',col = cis, lwd = 2, pch = 17, cex = 2, ylim = c(log(0.1), log(200)),
-     ylab = '', xlab = '', yaxt = 'n', col.axis = transparent)
+plot(log(cisco)~year, data = fish.raw, type = 'o',col = cis, lwd = 2, pch = 17, cex = 2, ylim = c(log(100), log(200000)),
+     ylab = '', xlab = '', yaxt = 'n', xlim = c(2001,2022), xaxt = 'n')
 axis(side=2,
-     at=c(log(0.1),log(0.2),log(0.3),log(0.4),log(0.5),log(0.6),log(0.7),log(0.8),log(0.9),
-           log(1),log(2),log(3),log(4),log(5),log(6),log(7),log(8),log(9),log(10),
-           log(20),log(30),log(40),log(50),log(60),log(70),log(80),log(90),log(100), 
-           log(200)), #Where the tick marks should be drawn
-     labels = c('0.1', '', '', '', '', '', '', '', '', 
-                '1', '', '', '', '', '', '', '', '', '10', '', '','','','','','','','100','200'),
-     las=0)
-mtext(side = 2, line =2.5, expression(Log~`[Fish`~Biomass~`(`~ kg ~ ha^-1~`)]`))
+     at=c(log(100),log(200), log(300), log(400), log(500), log(600), log(700), log(800), log(900), 
+          log(1000),log(2000),log(3000),log(4000),log(5000),log(6000),log(7000),log(8000),log(9000),
+          log(10000),log(20000),log(30000),log(40000),log(50000),log(60000),log(70000),log(80000),log(90000),
+          log(100000), log(200000)), #Where the tick marks should be drawn
+     labels = c('100', '', '', '', '', '', '', '', '', 
+                '1000', '', '', '', '', '', '', '', '', 
+                '10000', '', '','','','','','','',
+                '100000','200000'),
+     las=0, cex = 2)
+axis(side = 1, 
+     at = c(2000,2001,2002,2003,2004,2005,2006,2007,2008,
+            2009,2010,2011,2012,2013,2014,2015,2016,2017,
+            2018,2019,2020,2021,2022), 
+     labels = c('', '', '', '','','','','','','','','',
+                '', '','','','','','','','','',''), cex = 3, las = 3)
+
+mtext(side = 2, line =2.5, expression(Log~`[Fish`~Biomass~`(`~ g ~ ha^-1~`)]`))
 arrows(x0=fish.final$year, y0=log(fish.final$c.se.l), 
        x1=fish.final$year, y1=log(fish.final$c.se.u), col = cis, code = 3, angle=90, length=0, lwd = 3)
 points(log(lake.trout)~year, data = fish.raw, type = 'o', col = lt, lwd = 2, pch = 19, cex = 2)
@@ -120,20 +135,20 @@ pmiv.select = pelagic.miv %>%
   mutate(biomass.mg_perm2 = biomass.mg_perhec/10000, 
          biomass.mg.perm2.prop.err.se = biomass.mg.prop.err.se/10000)
 pmiv.select
-max(pmiv.select$biomass.mg_perm2)
-min(pmiv.select$biomass.mg_perm2)
+max(pmiv.select$biomass.g_perhec)
+min(pmiv.select$biomass.g_perhec)
 
 pmiv.wide = pmiv.select %>% 
   pivot_wider(id_cols = year4, 
               names_from = 'taxon', 
-              values_from = 'biomass.mg_perm2') %>% 
+              values_from = 'biomass.g_perhec') %>% 
   rename(chaoborus = `chaoborus larvae`)
 pmiv.wide
 
 pmiv.error = pmiv.select %>% 
   pivot_wider(id_cols = year4, 
               names_from = 'taxon', 
-              values_from = 'biomass.mg.perm2.prop.err.se') %>% 
+              values_from = 'biomass.prop.err.se') %>% 
   rename(chaoborus.se = `chaoborus larvae`, 
          leptodora.se = leptodora, 
          mysis.se = mysis, 
@@ -154,21 +169,30 @@ byth = 'gray60'
 # lep = '#f9afa6'
 # byth = 'gray30'
   
-plot(log(chaoborus)~year4, data = pmiv.final, type = 'o',col = chao, lwd = 2, pch = 17, cex = 2, ylim = c(log(0.001),log(300)),
-     ylab = '', xlab = '', yaxt = 'n', col.axis = transparent)
+plot(log(chaoborus)~year4, data = pmiv.final, type = 'o',col = chao, lwd = 2, pch = 17, cex = 2, ylim = c(log(0.01),log(3000)),
+     ylab = '', xlab = '', yaxt = 'n', col.axis = transparent, xlim = c(2001,2022), xaxt = 'n')
 axis(side=2,
-     at=c( log(0.001),log(0.002),log(0.003),log(0.004),log(0.005),log(0.006),log(0.007),log(0.008),log(0.009), 
+     at=c( 
        log(0.01),log(0.02),log(0.03),log(0.04),log(0.05),log(0.06),log(0.07),log(0.08),log(0.09), 
        log(0.1),log(0.2),log(0.3),log(0.4),log(0.5),log(0.6),log(0.7),log(0.8),log(0.9),
        log(1),log(2),log(3),log(4),log(5),log(6),log(7),log(8),log(9),log(10),
            log(20),log(30),log(40),log(50),log(60),log(70),log(80),log(90),log(100), 
-           log(200),log(300)), #Where the tick marks should be drawn
-     labels = c('0.001', '', '', '', '', '', '', '', '',
-                '0.01', '', '', '', '', '', '', '', '',
+           log(200),log(300), log(400), log(500), log(600), log(700), log(800), log(900), log(1000),
+       log(2000), log(3000)), #Where the tick marks should be drawn
+     labels = c('0.01', '', '', '', '', '', '', '', '',
                 '0.1', '', '', '', '', '', '', '', '', 
-                '1', '', '', '', '', '', '', '', '', '10', '', '','','','','','','','100','','300'),
-     las=0)
-mtext(side = 2, line =2.5, expression(`Log[`~MIV~Biomass ~`(`~ mg ~ m^-2~`)]`))
+                '1', '', '', '', '', '', '', '', '', 
+                '10', '', '','','','','','','',
+                '100','','', '', '','','','','',
+                '1000','',''),
+     las=0, cex = 2)
+axis(side = 1, 
+     at = c(2000,2001,2002,2003,2004,2005,2006,2007,2008,
+            2009,2010,2011,2012,2013,2014,2015,2016,2017,
+            2018,2019,2020,2021,2022), 
+     labels = c('', '', '', '','','','','','','','','',
+                '', '','','','','','','','','',''), cex = 3, las = 3)
+mtext(side = 2, line =2.5, expression(`Log[`~MZP~Biomass ~`(`~ g ~ ha^-1~`)]`))
 arrows(x0=pmiv.final$year4, y0=(log(pmiv.final$chaoborus - pmiv.final$chaoborus.se)), 
        x1=pmiv.final$year4, y1=(log(pmiv.final$chaoborus + pmiv.final$chaoborus.se)), col = chao, code = 3, angle=90, length=0, lwd = 3)
 points(log(leptodora)~year4, data = pmiv.final, type = 'o', col = lep, lwd = 2, pch = 15, cex = 2)
@@ -199,28 +223,26 @@ zoop.grouped.select = zoop.grouped %>%
          bodymass_g = avg.bodymass_g, 
          biomass.g_perhec = biomass_g.perhec) %>% 
   group_by(year, spp) %>% 
-  summarize(biomass.g_perhec = mean(biomass.g_perhec, na.rm = T),
+  summarize(biomass.g_perhec_mean = mean(biomass.g_perhec, na.rm = T),
             biomass_ugL = mean(biomass_ugL), 
             biomass.g_perm2 = mean(biomass_g.per_m2, na.rm = T), 
             sd_g.perm2 = sd(biomass_g.per_m2, na.rm = T), 
             g_perhec.sd = sd(biomass.g_perhec, na.rm = T),
             bodymass_g = mean(bodymass_g, na.rm = T), 
             mass_sd = sd(bodymass_g, na.rm = T)) %>% 
-  ungroup() %>% 
-  mutate(biomass.mg_perm2 = biomass.g_perm2*1000, 
-         sd_mg.perm2 = sd_g.perm2*1000) %>% 
-  mutate(se_mg.perm2 = sd_mg.perm2/sqrt(2)) %>% 
-  select(year, spp, biomass.mg_perm2, se_mg.perm2, biomass_ugL)
+  ungroup() %>%
+  mutate(se_g.perhec = g_perhec.sd/sqrt(2)) %>% 
+  select(year, spp, biomass.g_perhec_mean, se_g.perhec, biomass_ugL)
 zoop.grouped.select
 
-max(zoop.grouped.select$biomass.mg_perm2) # 5300
-min(zoop.grouped.select$biomass.mg_perm2) # 20
+max(zoop.grouped.select$biomass.g_perhec_mean) # 53000
+min(zoop.grouped.select$biomass.g_perhec_mean) # 227
 
 zp.wide = zoop.grouped.select%>% 
   mutate(spp = tolower(spp)) %>%
   pivot_wider(id_cols = year, 
               names_from = 'spp', 
-              values_from = 'biomass.mg_perm2')
+              values_from = 'biomass.g_perhec_mean')
 zp.wide
 
 zp.wide.check = zoop.grouped.select %>% 
@@ -234,17 +256,17 @@ zp.error = zoop.grouped.select %>%
   mutate(spp = tolower(spp)) %>%
   pivot_wider(id_cols = year, 
               names_from = 'spp', 
-              values_from = 'se_mg.perm2') %>% 
+              values_from = 'se_g.perhec') %>% 
   rename(clad.se = cladocera, 
          cope.se = copepoda, 
          roti.se = rotifera)
 zp.error  
 
-zp.final = left_join(zp.wide, zp.error, by = 'year')
+zp.final = left_join(zp.wide, zp.error, by = 'year') 
 zp.final
 
 #Zoop Plot #======================== 
-cop = '#cd5c05' 
+cop = rgb(205,92,5, maxColorValue = 255, alpha = 220)
 clad = rgb(205,92,5, maxColorValue = 255, alpha = 175)
 rot = rgb(205,92,5, maxColorValue = 255, alpha = 100)
 
@@ -253,21 +275,26 @@ rot = rgb(205,92,5, maxColorValue = 255, alpha = 100)
 # rot = '#e2a271'
 
 
-plot(log(cladocera)~year, data = zp.final, type = 'o',col = clad, lwd = 2, pch = 17, cex = 2, ylim = c(log(1),log(8000)),
-     ylab = '', xlab = '', yaxt = 'n') 
+plot(log(cladocera)~year, data = zp.final, type = 'o',col = clad, 
+     lwd = 2, pch = 17, cex = 2, ylim = c(log(10),log(60000)),
+     ylab = '', xlab = '', yaxt = 'n', xlim = c(2001,2022), xaxt = 'n') 
 axis(side=2,
-     at=c(log(0.1), log(0.2),log(0.3),log(0.4),log(0.5),log(0.6),log(0.7),log(0.8),log(0.9),
-          log(1), log(2),log(3),log(4),log(5),log(6),log(7),log(8),log(9),log(10),
-           log(20),log(30),log(40),log(50),log(60),log(70),log(80),log(90),log(100), 
-          log(200),log(300),log(400),log(500),log(600),log(700),log(800),log(900),log(1000),
-          log(2000),log(3000),log(4000),log(5000),log(6000),log(7000),log(8000)), #Where the tick marks should be drawn
-     labels = c('0.1', '', '', '', '', '', '', '', '',
-                '1', '', '', '', '', '', '', '', '',
-                '10', '', '', '', '', '', '', '', '',
-                '100', '', '', '', '', '', '', '', '',
-                '1000', '', '', '', '', '','','8000'),
-     las=0)
-mtext(side = 2, line =2.5, expression(`Log[`~Zoop~Biomass ~`(`~ mg ~ m^-2~`)]`))
+     at=c(log(10), log(20),log(30),log(40),log(50),log(60),log(70),log(80),log(90),
+          log(100), log(200),log(300),log(400),log(500),log(600),log(700),log(800),log(900),
+          log(1000),log(2000),log(3000),log(4000),log(5000),log(6000),log(7000),log(8000), log(9000),
+          log(10000), log(20000), log(30000), log(40000), log(50000), log(60000)), #Where the tick marks should be drawn
+     labels = c('10','', '', '', '', '', '', '', '',
+                '100','', '', '', '', '', '', '', '',
+                '1000', '', '', '', '', '', '', '', '',
+                '10000', '', '', '', '', '60000'),
+     las=0, cex = 2)
+axis(side = 1, 
+     at = c(2000,2001,2002,2003,2004,2005,2006,2007,2008,
+            2009,2010,2011,2012,2013,2014,2015,2016,2017,
+            2018,2019,2020,2021,2022), 
+     labels = c('', '2001', '', '2003','','2005','','2007','','2009','','2011',
+                '', '2013','','2015','','2017','','2019','','2021',''), cex = 3, las = 1)
+mtext(side = 2, line =2.5, expression(`Log[`~Zoop~Biomass ~`(`~ g ~ ha^-1~`)]`), cex = 1)
 arrows(x0=zp.final$year, y0=(log(zp.final$cladocera - zp.final$clad.se)), 
        x1=zp.final$year, y1=(log(zp.final$cladocera + zp.final$clad.se)), col = clad, code = 3, angle=90, length=0, lwd = 2)
 points(log(copepoda)~year, data = zp.final, type = 'o', col = cop, lwd = 2, pch = 19, cex = 2)
@@ -281,5 +308,5 @@ legend('bottomleft', legend = c('Copepoda', 'Cladocera',  'Rotifera'), pch = c(1
        bty = 'n', cex = 1.5)
 abline(v = 2006.5, lty = 2)
 abline(v = 2014.5, lty = 2)
-mtext(side = 1, 'Year', line = 2)
+mtext(side = 1, 'Year', line = 2, cex = 1)
 
